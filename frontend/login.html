@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accedi - Fast Food Express</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="index.html">FastFood Express</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Menu</a></li>
+                <li class="nav-item"><a class="nav-link active" href="login.html">Accedi</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card auth-card">
+                <h2 class="text-center mb-4 fw-bold">Bentornato!</h2>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label text-muted">Indirizzo Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label text-muted">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Accedi</button>
+                </form>
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="text-muted mb-1">Non hai ancora un account?</p>
+                    <a href="register.html" class="btn btn-outline-danger w-100 fw-bold d-block">Registrati ora</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

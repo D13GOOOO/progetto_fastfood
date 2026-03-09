@@ -1,0 +1,132 @@
+/* =========================================
+   1. VARIABILI GLOBALI (Stile "App Moderna")
+   ========================================= */
+:root {
+    --app-bg: #F3F4F6;
+    --card-bg: #FFFFFF;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    --accent-color: #FF6B35;
+    --price-green: #10B981;
+    --radius: 16px;
+    --dark-bg: #1F2937;
+}
+
+/* =========================================
+   2. REGOLE DI BASE
+   ========================================= */
+body {
+    background-color: var(--app-bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+}
+
+/* =========================================
+   3. COMPONENTI GLOBALI (Navbar e Footer)
+   ========================================= */
+.navbar-fastfood {
+    background-color: var(--dark-bg) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Testo della navbar reso bianco per contrastare lo sfondo scuro */
+.navbar-fastfood .navbar-brand,
+.navbar-fastfood .nav-link {
+    color: #F9FAFB !important;
+    font-weight: 600;
+}
+
+.navbar-fastfood .nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+.footer-fastfood {
+    background-color: var(--dark-bg);
+    margin-top: 4rem;
+    padding: 3rem 0;
+}
+
+/* =========================================
+   4. BOTTONI
+   ========================================= */
+.btn-primary {
+    background-color: var(--accent-color);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #E55A2B;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-danger {
+    background-color: var(--accent-color);
+    border: none;
+}
+
+/* =========================================
+   5. CARD E SEZIONI
+   ========================================= */
+.hero-section {
+    background-color: #FFFFFF;
+    padding: 5rem 0;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.card {
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.auth-card {
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--card-bg);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+}
+
+/* Carrello Offcanvas */
+.offcanvas-fastfood-header {
+    background-color: #FFFFFF;
+    color: var(--text-main);
+    border-bottom: 1px solid #E5E7EB;
+}
+.offcanvas-fastfood-header .btn-close {
+    filter: invert(1);
+}
+
+/* =========================================
+   6. OVERRIDE BOOTSTRAP (Colori Testo e Badge)
+   ========================================= */
+.text-success {
+    color: var(--price-green) !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.bg-danger {
+    background-color: var(--accent-color) !important;
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+
+.text-warning {
+    color: var(--accent-color) !important;
+}
