@@ -28,7 +28,7 @@
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card auth-card">
-                <h2 class="text-center mb-4 fw-bold">Nuovo Cliente?</h2>
+                <h2 class="text-center mb-4 fw-bold">Nuovo Account</h2>
                 <form id="register-form">
                     <div class="row mb-3">
                         <div class="col">
@@ -44,10 +44,24 @@
                         <label for="reg-email" class="form-label text-muted">Email</label>
                         <input type="email" class="form-control" id="reg-email" required>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="reg-password" class="form-label text-muted">Password</label>
                         <input type="password" class="form-control" id="reg-password" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="reg-ruolo" class="form-label text-muted">Tipologia Utente</label>
+                        <select class="form-select" id="reg-ruolo" required>
+                            <option value="cliente" selected>Cliente</option>
+                            <option value="ristoratore">Ristoratore</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reg-preferenze" class="form-label text-muted">Preferenze / Offerte Speciali (Opzionale)</label>
+                        <input type="text" class="form-control" id="reg-preferenze" placeholder="Es. Vegano, Carne, Offerte sui Burger...">
+                        <div class="form-text" style="font-size: 0.8rem;">Dicci cosa ti piace, ti proporremo i piatti migliori!</div>
+                    </div>
+
                     <button type="submit" class="btn btn-danger w-100 fw-bold py-2">Crea Account</button>
                 </form>
                 <hr class="my-4">

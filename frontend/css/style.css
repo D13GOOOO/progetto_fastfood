@@ -1,6 +1,3 @@
-/* =========================================
-   1. VARIABILI GLOBALI (Stile "App Moderna")
-   ========================================= */
 :root {
     --app-bg: #F3F4F6;
     --card-bg: #FFFFFF;
@@ -12,24 +9,22 @@
     --dark-bg: #1F2937;
 }
 
-/* =========================================
-   2. REGOLE DI BASE
-   ========================================= */
+/* Base */
 body {
     background-color: var(--app-bg);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* =========================================
-   3. COMPONENTI GLOBALI (Navbar e Footer)
-   ========================================= */
+/* Navbar e Footer */
 .navbar-fastfood {
     background-color: var(--dark-bg) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Testo della navbar reso bianco per contrastare lo sfondo scuro */
 .navbar-fastfood .navbar-brand,
 .navbar-fastfood .nav-link {
     color: #F9FAFB !important;
@@ -42,13 +37,11 @@ body {
 
 .footer-fastfood {
     background-color: var(--dark-bg);
-    margin-top: 4rem;
-    padding: 3rem 0;
+    padding: 2rem 0;
+    margin-top: auto;
 }
 
-/* =========================================
-   4. BOTTONI
-   ========================================= */
+/* Bottoni */
 .btn-primary {
     background-color: var(--accent-color);
     color: #FFFFFF;
@@ -56,7 +49,7 @@ body {
     font-weight: 600;
     border-radius: 8px;
     padding: 10px 20px;
-    transition: all 0.2s;
+    transition: all 0.2s ease-in-out;
 }
 
 .btn-primary:hover {
@@ -71,13 +64,11 @@ body {
     border: none;
 }
 
-/* =========================================
-   5. CARD E SEZIONI
-   ========================================= */
+/* Cards e Layout */
 .hero-section {
     background-color: #FFFFFF;
-    padding: 5rem 0;
-    margin-bottom: 3rem;
+    padding: 4rem 0;
+    margin-bottom: 2rem;
     border-bottom: 1px solid #E5E7EB;
 }
 
@@ -85,17 +76,23 @@ body {
     border: none;
     border-radius: var(--radius);
     background-color: var(--card-bg);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 250px;
+    object-fit: cover;
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
 }
 
 .auth-card {
-    border: none;
     border-radius: var(--radius);
     background-color: var(--card-bg);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
@@ -108,25 +105,28 @@ body {
     color: var(--text-main);
     border-bottom: 1px solid #E5E7EB;
 }
-.offcanvas-fastfood-header .btn-close {
-    filter: invert(1);
-}
 
-/* =========================================
-   6. OVERRIDE BOOTSTRAP (Colori Testo e Badge)
-   ========================================= */
+/* Overrides di BootStrap */
 .text-success {
     color: var(--price-green) !important;
     font-weight: 700;
-    font-size: 1.1rem;
 }
 
 .bg-danger {
     background-color: var(--accent-color) !important;
-    border-radius: 6px;
-    padding: 5px 10px;
 }
 
 .text-warning {
     color: var(--accent-color) !important;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-muted);
+    border: none;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-color);
+    border-bottom: 3px solid var(--accent-color);
+    background: none;
 }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il mio Profilo - Fast Food Express</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="index.html">FastFood Express</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="index.html">Torna al Menu</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm p-4">
+                <h2 class="fw-bold mb-4">Gestione Profilo</h2>
+                <form id="form-profilo">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="prof-nome" class="form-label">Nome</label>
+                            <input type="text" id="prof-nome" class="form-control">
+                        </div>
+                        <div class="col">
+                            <label for="prof-cognome" class="form-label">Cognome</label>
+                            <input type="text" id="prof-cognome" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prof-email" class="form-label">Email</label>
+                        <input type="email" id="prof-email" class="form-control" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prof-indirizzo" class="form-label">Indirizzo di Consegna</label>
+                        <input type="text" id="prof-indirizzo" class="form-control">
+                    </div>
+                    <hr>
+                    <h5 class="fw-bold">Pagamento e Preferenze</h5>
+                    <div class="mb-3">
+                        <label for="prof-tipo-pag" class="form-label">Metodo di Pagamento</label>
+                        <select id="prof-tipo-pag" class="form-select">
+                            <option value="Contanti">Contanti</option>
+                            <option value="Carta di Credito">Carta di Credito</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prof-pref" class="form-label">Note / Preferenze Allergie</label>
+                        <textarea id="prof-pref" class="form-control"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold">Salva Modifiche</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminaAccount()">Elimina Profilo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer-fastfood mt-auto">
+    <div class="container text-center text-white">FastFood Express 2026</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/profilo.js"></script>
+</body>
+</html>

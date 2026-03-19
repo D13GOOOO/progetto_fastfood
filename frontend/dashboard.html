@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ristoratore - Fast Food Express</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">Dashboard Gestione</a>
+        <div class="d-flex">
+            <span class="navbar-text me-3 fw-bold text-white" id="nome-ristoratore"></span>
+            <button class="btn btn-outline-light btn-sm fw-bold" onclick="esci()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="ordini-tab" data-bs-toggle="tab" data-bs-target="#ordini" type="button" role="tab">Gestione Ordini</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="miomenu-tab" data-bs-toggle="tab" data-bs-target="#miomenu" type="button" role="tab">Il Mio Menu</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="ristorante-tab" data-bs-toggle="tab" data-bs-target="#ristorante" type="button" role="tab">Dati Ristorante</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="piatti-tab" data-bs-toggle="tab" data-bs-target="#piatti" type="button" role="tab">Nuovo Piatto</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-success" id="catalogo-tab" data-bs-toggle="tab" data-bs-target="#catalogo" type="button" role="tab">Catalogo Base</button>
+        </li>
+    </ul>
+
+    <div class="tab-content bg-white p-4 border border-top-0 rounded-bottom shadow-sm" id="dashboardTabsContent">
+
+        <div class="tab-pane fade show active" id="ordini" role="tabpanel">
+            <h4 class="mb-3 fw-bold text-primary">Ordini in Corso</h4>
+            <div class="row mb-4 text-center">
+                <div class="col-md-4">
+                    <div class="card bg-success text-white shadow-sm">
+                        <div class="card-body py-3">
+                            <h6 class="text-uppercase fw-bold mb-1">Totale Incassi</h6>
+                            <h3 class="mb-0" id="stat-incassi">0.00 €</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white shadow-sm">
+                        <div class="card-body py-3">
+                            <h6 class="text-uppercase fw-bold mb-1">Ordini Totali</h6>
+                            <h3 class="mb-0" id="stat-totali">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-dark shadow-sm">
+                        <div class="card-body py-3">
+                            <h6 class="text-uppercase fw-bold mb-1">Da Completare</h6>
+                            <h3 class="mb-0" id="stat-pendenti">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Piatti</th>
+                        <th>Totale</th>
+                        <th>Stato Attuale</th>
+                        <th>Azioni</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tabella-ordini">
+                    <tr><td colspan="6" class="text-center">Caricamento ordini...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="miomenu" role="tabpanel">
+            <h4 class="mb-3 fw-bold text-primary">I Piatti nel tuo Menu</h4>
+            <div id="contenitore-mio-menu" class="row row-cols-1 row-cols-md-4 g-3">
+                <div class="col-12 text-center">Caricamento menu...</div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="ristorante" role="tabpanel">
+            <h4 class="mb-3 fw-bold text-primary">Configura il tuo Ristorante</h4>
+            <form id="form-ristorante">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="rest-nome" class="form-label">Nome Ristorante</label>
+                        <input type="text" class="form-control" id="rest-nome" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rest-piva" class="form-label">Partita IVA</label>
+                        <input type="text" class="form-control" id="rest-piva" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="rest-indirizzo" class="form-label">Indirizzo Sede</label>
+                        <input type="text" class="form-control" id="rest-indirizzo" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rest-telefono" class="form-label">Telefono</label>
+                        <input type="text" class="form-control" id="rest-telefono" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary fw-bold">Salva Dati Ristorante</button>
+            </form>
+        </div>
+
+        <div class="tab-pane fade" id="piatti" role="tabpanel">
+            <h4 class="mb-3 fw-bold text-primary">Aggiungi Piatto Personalizzato</h4>
+            <form id="form-piatto">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="piatto-nome" class="form-label">Nome Piatto</label>
+                        <input type="text" class="form-control" id="piatto-nome" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="piatto-prezzo" class="form-label">Prezzo (€)</label>
+                        <input type="number" step="0.01" class="form-control" id="piatto-prezzo" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="piatto-categoria" class="form-label">Categoria</label>
+                        <input type="text" class="form-control" id="piatto-categoria">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="piatto-ingredienti" class="form-label">Ingredienti (separati da virgola)</label>
+                    <input type="text" class="form-control" id="piatto-ingredienti">
+                </div>
+                <div class="mb-4">
+                    <label for="piatto-immagine" class="form-label">URL Immagine</label>
+                    <input type="url" class="form-control" id="piatto-immagine">
+                </div>
+                <button type="submit" class="btn btn-success fw-bold">Salva Piatto nel Menu</button>
+            </form>
+        </div>
+
+        <div class="tab-pane fade" id="catalogo" role="tabpanel">
+            <h4 class="mb-3 fw-bold text-success">Seleziona Piatti dal Catalogo di Sistema</h4>
+            <p class="text-muted mb-4">Aggiungi i piatti predefiniti al tuo menu con un clic.</p>
+            <div id="contenitore-catalogo" class="row row-cols-1 row-cols-md-4 g-3">
+                <div class="col-12 text-center">Caricamento catalogo...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="modalGestisciPiatto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="form-gestisci-piatto">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-primary">Modifica Piatto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="mod-id-piatto">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="mod-nome" class="form-label fw-bold">Nome Piatto</label>
+                            <input type="text" class="form-control" id="mod-nome" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mod-prezzo" class="form-label fw-bold">Prezzo Base (€)</label>
+                            <input type="number" step="0.01" class="form-control" id="mod-prezzo" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mod-categoria" class="form-label">Categoria</label>
+                            <input type="text" class="form-control" id="mod-categoria">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mod-immagine" class="form-label">URL Immagine</label>
+                            <input type="url" class="form-control" id="mod-immagine">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="mod-ingredienti" class="form-label">Ingredienti (separati da virgola)</label>
+                        <input type="text" class="form-control" id="mod-ingredienti">
+                    </div>
+
+                    <hr>
+                    <h6 class="fw-bold text-danger mb-3">Promozione a tempo (Opzionale)</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mod-sconto-percentuale" class="form-label">Sconto (%)</label>
+                            <input type="number" class="form-control" id="mod-sconto-percentuale" min="0" max="100" placeholder="Es. 20">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mod-sconto-scadenza" class="form-label">Valido Fino Al</label>
+                            <input type="datetime-local" class="form-control" id="mod-sconto-scadenza">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-outline-danger fw-bold me-2" id="btn-elimina-piatto-modal">Elimina Piatto</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary fw-bold">Salva Modifiche</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

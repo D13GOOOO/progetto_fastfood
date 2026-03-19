@@ -3,55 +3,45 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Configurazione Middleware
 app.use(cors());
 app.use(express.json());
 
-// Configurazione Documentazione API
 const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Fast Food API',
-      version: '1.0.0',
-      description: 'Documentazione delle API per il progetto Fast Food',
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Fast Food API',
+            version: '1.0.0',
+            description: 'Documentazione RESTful API per il progetto Fast Food Express',
+        },
+        servers: [{ url: `http://localhost:${PORT}` }],
     },
-    servers: [{ url: 'http://localhost:3000' }],
-  },
-  apis: ['./src/routes/*.js'],
+    apis: [path.join(__dirname, 'routes/*.js')],
 };
-//const swaggerDocs = swaggerJsdoc(swaggerOptions);
-//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Importazione Rotte
-const mealsRoutes = require('./routes/meals');
-const usersRoutes = require('./routes/users');
-const ordersRoutes = require('./routes/orders');
-const restaurantsRoutes = require('./routes/restaurants');
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Connessione al Database
-const mongoURI = 'mongodb://127.0.0.1:27017/fastfood';
+const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fastfood';
 mongoose
-  .connect(mongoURI)
-  .then(() => console.log('Connesso con successo a MongoDB'))
-  .catch((errore) => console.error('Errore di connessione a MongoDB:', errore));
+    .connect(mongoURI)
+    .then(() => console.log('Connesso con successo a MongoDB'))
+    .catch((errore) => console.error('Errore critico di connessione a MongoDB:', errore));
 
-// Utilizzo Rotte
-app.use('/api/meals', mealsRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/restaurants', restaurantsRoutes);
+app.use('/api/users', require('./routes/users'));
+app.use('/api/restaurants', require('./routes/restaurants'));
+app.use('/api/meals', require('./routes/meals'));
+app.use('/api/orders', require('./routes/orders'));
 
-// Rotta di base per testare il server
 app.get('/', (req, res) => {
-  res.json({ messaggio: 'Benvenuto nel server di Fast Food!' });
+    res.status(200).json({ status: 'OK', message: 'Fast Food API Server is running' });
 });
 
-// Avvio Server
 app.listen(PORT, () => {
-  console.log(`Server avviato con successo! In ascolto sulla porta ${PORT}`);
+    console.log(`Server avviato! API Docs: http://localhost:${PORT}/api-docs`);
 });

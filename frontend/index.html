@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fast Food Express - Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
     <div class="container">
         <a class="navbar-brand fw-bold" href="index.html">FastFood Express</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" href="index.html">Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="ristoranti.html">Ristoranti</a></li>
                 <li class="nav-item">
                     <a class="nav-link text-warning fw-bold" href="#" data-bs-toggle="offcanvas" data-bs-target="#carrelloOffcanvas">
                         Carrello <span id="contatore-carrello" class="badge bg-light text-dark ms-1">0</span>
@@ -33,10 +35,38 @@
 
 <header class="hero-section">
     <div class="container text-center">
-        <h1 class="display-4 fw-bolder">Ordina il tuo Hamburger preferito!</h1>
+        <h1 class="display-4 fw-bolder">Ordina il tuo Piatto preferito!</h1>
         <p class="lead text-muted">Veloce, caldo e direttamente a casa tua.</p>
     </div>
 </header>
+
+<div class="container mb-5">
+    <div class="card shadow-sm border-0 p-3 bg-white rounded-3">
+        <form id="form-ricerca" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="filtro-nome" class="form-label text-muted small fw-bold">Nome Piatto</label>
+                <input type="text" id="filtro-nome" class="form-control" placeholder="Es. Panino...">
+            </div>
+            <div class="col-md-3">
+                <label for="filtro-categoria" class="form-label text-muted small fw-bold">Categoria</label>
+                <select id="filtro-categoria" class="form-select">
+                    <option value="">Tutte le categorie</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filtro-prezzo" class="form-label text-muted small fw-bold">Prezzo Max (€)</label>
+                <input type="number" step="0.50" id="filtro-prezzo" class="form-control" placeholder="Es. 15">
+            </div>
+            <div class="col-md-3">
+                <label for="filtro-ingrediente" class="form-label text-muted small fw-bold">Ingrediente</label>
+                <input type="text" id="filtro-ingrediente" class="form-control" placeholder="Es. Beef, Cheese...">
+            </div>
+            <div class="col-md-1 d-flex gap-2">
+                <button type="submit" class="btn btn-danger w-100 fw-bold" title="Cerca">🔍</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="container">
     <div id="menu-container" class="row row-cols-1 row-cols-md-3 g-4">
@@ -47,10 +77,10 @@
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="carrelloOffcanvas">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="carrelloOffcanvas" aria-labelledby="carrelloLabel">
     <div class="offcanvas-header offcanvas-fastfood-header">
-        <h5 class="offcanvas-title fw-bold">Il tuo Ordine</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        <h5 class="offcanvas-title fw-bold" id="carrelloLabel">Il tuo Ordine</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <ul id="lista-carrello" class="list-group mb-auto">
@@ -66,7 +96,7 @@
     </div>
 </div>
 
-<footer class="footer-fastfood">
+<footer class="footer-fastfood mt-auto">
     <div class="container"><p class="m-0 text-center text-white">Copyright &copy; FastFood Express 2026</p></div>
 </footer>
 

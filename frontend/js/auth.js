@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Gestione Login
     const loginForm = document.getElementById('login-form');
 
     if (loginForm) {
@@ -22,7 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('utenteLoggato', JSON.stringify(data));
 
                     alert('Bentornato! Accesso effettuato con successo');
-                    window.location.href = 'index.html';
+
+                    if (data.utente.ruolo === 'ristoratore') {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else {
                     const errore = await response.json();
                     alert('Errore: ' + (errore.message || 'Credenziali non valide'));
@@ -34,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Gestione Registrazione
     const registerForm = document.getElementById('register-form');
 
     if (registerForm) {
@@ -45,12 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const cognome = document.getElementById('reg-cognome').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const ruolo = document.getElementById('reg-ruolo').value;
+            const preferenze = document.getElementById('reg-preferenze').value;
 
             try {
                 const response = await fetch('http://localhost:3000/api/users/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, cognome, email, password, ruolo: 'cliente' })
+                    body: JSON.stringify({ nome, cognome, email, password, ruolo, preferenze })
                 });
 
                 if (response.ok) {
