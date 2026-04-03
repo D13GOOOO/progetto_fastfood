@@ -33,38 +33,44 @@
     </div>
 </nav>
 
-<header class="hero-section">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bolder">Ordina il tuo Piatto preferito!</h1>
-        <p class="lead text-muted">Veloce, caldo e direttamente a casa tua.</p>
+<header class="container mt-5 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h2 class="fw-bold mb-0 fs-2" style="color: var(--text-main);">Il nostro Menu</h2>
+        <p class="text-muted mb-0">Veloce, caldo e direttamente a casa tua.</p>
     </div>
+    <button class="btn btn-outline-secondary bg-white border rounded-pill px-4 py-2 shadow-sm text-muted d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRicerca" aria-expanded="false" aria-controls="collapseRicerca" style="width: 250px;">
+        <span>Cerca piatto...</span>
+        <span>▼</span>
+    </button>
 </header>
 
-<div class="container mb-5">
-    <div class="card shadow-sm border-0 p-3 bg-white rounded-3">
-        <form id="form-ricerca" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label for="filtro-nome" class="form-label text-muted small fw-bold">Nome Piatto</label>
-                <input type="text" id="filtro-nome" class="form-control" placeholder="Es. Panino...">
-            </div>
-            <div class="col-md-3">
-                <label for="filtro-categoria" class="form-label text-muted small fw-bold">Categoria</label>
-                <select id="filtro-categoria" class="form-select">
-                    <option value="">Tutte le categorie</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="filtro-prezzo" class="form-label text-muted small fw-bold">Prezzo Max (€)</label>
-                <input type="number" step="0.50" id="filtro-prezzo" class="form-control" placeholder="Es. 15">
-            </div>
-            <div class="col-md-3">
-                <label for="filtro-ingrediente" class="form-label text-muted small fw-bold">Ingrediente</label>
-                <input type="text" id="filtro-ingrediente" class="form-control" placeholder="Es. Beef, Cheese...">
-            </div>
-            <div class="col-md-1 d-flex gap-2">
-                <button type="submit" class="btn btn-danger w-100 fw-bold" title="Cerca">🔍</button>
-            </div>
-        </form>
+<div class="collapse" id="collapseRicerca">
+    <div class="container pb-4">
+        <div class="card shadow-sm border-0 p-4 bg-white rounded-3">
+            <form id="form-ricerca" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="filtro-nome" class="form-label text-muted small fw-bold">Nome Piatto</label>
+                    <input type="text" id="filtro-nome" class="form-control" placeholder="Es. Panino...">
+                </div>
+                <div class="col-md-3">
+                    <label for="filtro-categoria" class="form-label text-muted small fw-bold">Categoria</label>
+                    <select id="filtro-categoria" class="form-select">
+                        <option value="">Tutte le categorie</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filtro-prezzo" class="form-label text-muted small fw-bold">Prezzo Max (€)</label>
+                    <input type="number" step="0.50" id="filtro-prezzo" class="form-control" placeholder="Es. 15">
+                </div>
+                <div class="col-md-3">
+                    <label for="filtro-ingrediente" class="form-label text-muted small fw-bold">Ingrediente</label>
+                    <input type="text" id="filtro-ingrediente" class="form-control" placeholder="Es. Beef, Cheese...">
+                </div>
+                <div class="col-md-1 d-flex gap-2">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold">Vai</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

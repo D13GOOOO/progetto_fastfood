@@ -1,3 +1,5 @@
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const utenteSalvato = localStorage.getItem('utenteLoggato');
     if (!utenteSalvato) {
@@ -9,11 +11,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const uid = sessione.utente.id;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/users/${uid}`);
-        if (response.ok) {
-            const utente = await response.json();
+        const response = await fetch(`${API_URL}/users/${uid}`);
+        if (!response.ok) throw new Error("Recupero profilo fallito");
+        
+        const utente = await response.json();
 
-            const profNome = document.getElementById('prof-nome');
+        const profNome = document.getElementById('prof-nome');
             if (profNome) profNome.value = utente.nome || '';
 
             const profCognome = document.getElementById('prof-cognome');
@@ -30,9 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const profPref = document.getElementById('prof-pref');
             if (profPref) profPref.value = utente.preferenze || '';
-        }
     } catch (error) {
         console.error("Errore nel recupero dati profilo:", error);
+        alert("Impossibile caricare le informazioni del profilo.");
     }
 
     const formProfilo = document.getElementById('form-profilo');
@@ -51,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             try {
-                const response = await fetch(`http://localhost:3000/api/users/${uid}`, {
+                const response = await fetch(`${API_URL}/users/${uid}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(update)
@@ -60,12 +63,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     alert('Profilo aggiornato con successo!');
                 } else {
-                    alert('Errore durante l\'aggiornamento.');
+                    const errore = await response.json();
+                    alert(`Errore durante l'aggiornamento: ${errore.message || ''}`);
                 }
             } catch (error) {
                 console.error("Errore salvataggio profilo:", error);
+                alert("Problema di connessione con il server.");
             }
         });
+    }
+
+    const btnElimina = document.getElementById('btn-elimina-account');
+    if (btnElimina) {
+        btnElimina.addEventListener('click', eliminaAccount);
     }
 });
 
@@ -81,7 +91,7 @@ async function eliminaAccount() {
         const sessione = JSON.parse(utenteSalvato);
         const uid = sessione.utente.id;
 
-        const response = await fetch(`http://localhost:3000/api/users/${uid}`, {
+        const response = await fetch(`${API_URL}/users/${uid}`, {
             method: 'DELETE'
         });
 

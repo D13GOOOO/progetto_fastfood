@@ -1,10 +1,13 @@
 /* global bootstrap */
 
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api';
+
 let menuOriginale = [];
-let carrello = [];
+let carrello = JSON.parse(localStorage.getItem('carrelloFastFood')) || [];
 let ristorantiGlobali = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    aggiornaInterfacciaCarrello();
     caricaMenu().catch(console.error);
     controllaLogin();
 
@@ -17,7 +20,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnPaga) {
         btnPaga.addEventListener('click', inviaOrdine);
     }
+    
+    // Event delegation per i bottoni "Aggiungi al carrello"
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        menuContainer.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('btn-aggiungi-carrello')) {
+                const id = e.target.getAttribute('data-id');
+                aggiungiAlCarrello(id, e);
+            }
+        });
+    }
 });
+
+// Funzione di utilità per calcolare il prezzo reale (DRY)
+function calcolaPrezzoReale(piatto) {
+    let prezzo = piatto.prezzo || 0;
+    if (piatto.scontoPercentuale > 0 && piatto.scontoScadenza) {
+        if (new Date(piatto.scontoScadenza) > new Date()) {
+            prezzo = prezzo - (prezzo * (piatto.scontoPercentuale / 100));
+        }
+    }
+    return prezzo;
+}
+
+// Prevenzione XSS di base
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag]));
+}
 
 function controllaLogin() {
     const utenteSalvato = localStorage.getItem('utenteLoggato');
@@ -35,15 +72,18 @@ function controllaLogin() {
 
         areaUtente.innerHTML = `
             <a class="nav-link dropdown-toggle fw-bold text-success" href="#" role="button" data-bs-toggle="dropdown">
-                Ciao, ${dati.utente.nome}
+                Ciao, ${escapeHTML(dati.utente.nome)}
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                 ${linkProfilo} 
                 ${linkAreaPrivata}
                 <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item text-danger fw-bold" onclick="esci()">Logout</button></li>
+                <li><button class="dropdown-item text-danger fw-bold" id="btn-logout">Logout</button></li>
             </ul>
         `;
+        
+        // Colleghiamo l'evento click per il logout via JavaScript
+        document.getElementById('btn-logout').addEventListener('click', esci);
     }
 }
 
@@ -55,9 +95,13 @@ function esci() {
 async function caricaMenu() {
     try {
         const [resPiatti, resRistoranti] = await Promise.all([
-            fetch('http://localhost:3000/api/meals'),
-            fetch('http://localhost:3000/api/restaurants')
+            fetch(`${API_URL}/meals`),
+            fetch(`${API_URL}/restaurants`)
         ]);
+
+        if (!resPiatti.ok || !resRistoranti.ok) {
+            throw new Error("Errore nel caricamento dati dal server");
+        }
 
         const piatti = await resPiatti.json();
         ristorantiGlobali = await resRistoranti.json();
@@ -108,21 +152,19 @@ function renderizzaMenu(piatti) {
     }
 
     contenitore.innerHTML = piatti.map(piatto => {
-        let bloccoPrezzo = `<h6 class="fw-bold text-success mb-3">${piatto.prezzo ? piatto.prezzo.toFixed(2) : "0.00"} €</h6>`;
+        const prezzoScontato = calcolaPrezzoReale(piatto);
+        
+        let bloccoPrezzo = `<h6 class="fw-bold text-success mb-3">${prezzoScontato.toFixed(2)} €</h6>`;
         let badgeSconto = '';
 
-        if (piatto.scontoPercentuale > 0 && piatto.scontoScadenza) {
-            const dataScadenza = new Date(piatto.scontoScadenza);
-            if (dataScadenza > new Date()) {
-                const prezzoScontato = piatto.prezzo - (piatto.prezzo * (piatto.scontoPercentuale / 100));
-                bloccoPrezzo = `
-                    <div class="mb-3">
-                        <span class="text-muted text-decoration-line-through small me-2">${piatto.prezzo.toFixed(2)} €</span>
-                        <h6 class="fw-bold text-danger d-inline">${prezzoScontato.toFixed(2)} €</h6>
-                    </div>
-                `;
-                badgeSconto = `<span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2 shadow-sm fs-6">-${piatto.scontoPercentuale}%</span>`;
-            }
+        if (prezzoScontato < (piatto.prezzo || 0)) {
+            bloccoPrezzo = `
+                <div class="mb-3">
+                    <span class="text-muted text-decoration-line-through small me-2">${piatto.prezzo.toFixed(2)} €</span>
+                    <h6 class="fw-bold text-danger d-inline">${prezzoScontato.toFixed(2)} €</h6>
+                </div>
+            `;
+            badgeSconto = `<span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2 shadow-sm fs-6">-${piatto.scontoPercentuale}%</span>`;
         }
 
         const ristorante = ristorantiGlobali.find(r =>
@@ -135,15 +177,15 @@ function renderizzaMenu(piatti) {
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm position-relative">
                     ${badgeSconto}
-                    <img src="${piatto.strMealThumb}" class="card-img-top" alt="${piatto.strMeal}">
+                    <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title fw-bold m-0">${piatto.strMeal}</h5>
-                            <span class="badge bg-danger">${piatto.strCategory}</span>
+                            <h5 class="card-title fw-bold m-0">${escapeHTML(piatto.strMeal)}</h5>
+                            <span class="badge bg-danger">${escapeHTML(piatto.strCategory)}</span>
                         </div>
-                        <p class="text-muted small mb-3">👨‍🍳 Preparato da: <strong>${nomeRistorante}</strong></p>
+                        <p class="text-muted small mb-3">👨‍🍳 Preparato da: <strong>${escapeHTML(nomeRistorante)}</strong></p>
                         ${bloccoPrezzo}
-                        <button class="btn btn-primary w-100 mt-auto fw-bold" onclick="aggiungiAlCarrello('${piatto.idMeal}', event)">
+                        <button class="btn btn-primary w-100 mt-auto fw-bold btn-aggiungi-carrello" data-id="${piatto.idMeal}">
                             Aggiungi al Carrello
                         </button>
                     </div>
@@ -165,10 +207,7 @@ function applicaFiltri(e) {
         const matchNome = String(p.strMeal).toLowerCase().includes(nome);
         const matchCategoria = categoria === "" || p.strCategory === categoria;
 
-        let prezzoAttuale = p.prezzo || 0;
-        if (p.scontoPercentuale > 0 && p.scontoScadenza && new Date(p.scontoScadenza) > new Date()) {
-            prezzoAttuale = p.prezzo - (p.prezzo * (p.scontoPercentuale / 100));
-        }
+        const prezzoAttuale = calcolaPrezzoReale(p);
         const matchPrezzo = isNaN(prezzoMax) || (prezzoAttuale <= prezzoMax);
 
         const matchIngrediente = ingrediente === "" || (Array.isArray(p.ingredients) && p.ingredients.some(ing =>
@@ -192,11 +231,7 @@ function aggiungiAlCarrello(id, event) {
         }
 
         const piattoDaCarrello = JSON.parse(JSON.stringify(piattoScelto));
-        if (piattoDaCarrello.scontoPercentuale > 0 && piattoDaCarrello.scontoScadenza) {
-            if (new Date(piattoDaCarrello.scontoScadenza) > new Date()) {
-                piattoDaCarrello.prezzo = piattoDaCarrello.prezzo - (piattoDaCarrello.prezzo * (piattoDaCarrello.scontoPercentuale / 100));
-            }
-        }
+
 
         carrello.push(piattoDaCarrello);
         aggiornaInterfacciaCarrello();
@@ -212,6 +247,8 @@ function rimuoviDalCarrello(indice) {
 }
 
 function aggiornaInterfacciaCarrello() {
+    salvaCarrello();
+
     const contatore = document.getElementById('contatore-carrello');
     if (contatore) contatore.innerText = String(carrello.length);
 
@@ -227,19 +264,32 @@ function aggiornaInterfacciaCarrello() {
 
     let totale = 0;
     lista.innerHTML = carrello.map((item, index) => {
-        totale += item.prezzo || 0;
+        const prezzoScontato = calcolaPrezzoReale(item);
+        totale += prezzoScontato;
         return `
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span class="text-truncate" style="max-width: 70%;">${item.strMeal}</span>
+                <span class="text-truncate" style="max-width: 70%;">${escapeHTML(item.strMeal)}</span>
                 <div>
-                    <span class="badge bg-success me-2">${item.prezzo ? item.prezzo.toFixed(2) : "0.00"} €</span>
-                    <button class="btn btn-sm btn-outline-danger" onclick="rimuoviDalCarrello(${index})">X</button>
+                    <span class="badge bg-success me-2">${prezzoScontato.toFixed(2)} €</span>
+                    <button class="btn btn-sm btn-outline-danger btn-rimuovi-carrello" data-index="${index}">X</button>
                 </div>
             </li>
         `;
     }).join('');
 
     totaleTesto.innerText = totale.toFixed(2) + ' €';
+    
+    // Riapplica event listener per i bottoni rimuovi (dato che abbaimo riscritto il DOM della lista)
+    document.querySelectorAll('.btn-rimuovi-carrello').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = Number(e.target.getAttribute('data-index'));
+            rimuoviDalCarrello(index);
+        });
+    });
+}
+
+function salvaCarrello() {
+    localStorage.setItem('carrelloFastFood', JSON.stringify(carrello));
 }
 
 function animazioneLancioCarrello(idPiatto, bottoneCliccato) {
@@ -304,20 +354,21 @@ async function inviaOrdine() {
 
     let totaleOrdine = 0;
     const piattiOrdinati = carrello.map(piatto => {
-        totaleOrdine += piatto.prezzo || 0;
-        return { nome: piatto.strMeal, prezzo: piatto.prezzo };
+        const prezzoVero = calcolaPrezzoReale(piatto);
+        totaleOrdine += prezzoVero;
+        return { nome: piatto.strMeal, prezzo: prezzoVero };
     });
 
     const payloadOrdine = {
         utenteId: userId,
         piatti: piattiOrdinati,
         totale: parseFloat(totaleOrdine.toFixed(2)),
-        stato: "In preparazione",
+        stato: "In attesa",
         ristoratoreId: ristId
     };
 
     try {
-        const response = await fetch('http://localhost:3000/api/orders', {
+        const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payloadOrdine)
@@ -330,7 +381,7 @@ async function inviaOrdine() {
 
             const offcanvasElement = document.getElementById('carrelloOffcanvas');
             if (offcanvasElement) {
-                const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
                 if (offcanvas) offcanvas.hide();
             }
         } else {
@@ -354,7 +405,10 @@ async function caricaOrdiniUtente() {
     const userId = datiUtente.utente.id;
 
     try {
-        const response = await fetch('http://localhost:3000/api/orders');
+        const response = await fetch(`${API_URL}/orders`);
+        
+        if (!response.ok) throw new Error("Errore nel recupero degli ordini");
+        
         const tuttiGliOrdini = await response.json();
 
         const mieiOrdini = tuttiGliOrdini.filter(o => {
@@ -382,12 +436,7 @@ async function caricaOrdiniUtente() {
             let extraUi = '';
 
             if (ordine.stato === 'In preparazione' || ordine.stato === 'In attesa') {
-                extraUi = `<div class="text-danger small mt-3 fw-bold">⏳ Attesa stimata: ${ordine.tempoAttesa || 15} minuti</div>`;
-            }
-
-            if (ordine.stato === 'In consegna') {
-                coloreBadge = 'bg-info text-dark';
-                extraUi = `<button class="btn btn-sm btn-success w-100 mt-3 fw-bold shadow-sm" onclick="confermaRicezioneCliente('${ordine._id}')">Conferma Ricezione Ordine</button>`;
+                extraUi = `<div class="text-danger small mt-3 fw-bold">⏳ Attesa stimata: ${escapeHTML(String(ordine.tempoAttesa || 15))} minuti</div>`;
             } else if (ordine.stato === 'Consegnato') {
                 coloreBadge = 'bg-success';
                 extraUi = `<div class="text-success small mt-3 fw-bold">✔️ Ordine Completato</div>`;
@@ -395,7 +444,7 @@ async function caricaOrdiniUtente() {
 
             const listaPiatti = ordine.piatti.map(p =>
                 `<li class="d-flex justify-content-between text-muted small border-bottom pb-1 mb-1">
-                    <span>${p.quantita}x ${p.nomePiatto}</span>
+                    <span>${escapeHTML(String(p.quantita))}x ${escapeHTML(p.nomePiatto)}</span>
                     <span>${p.prezzo ? p.prezzo.toFixed(2) : "0.00"} €</span>
                 </li>`
             ).join('');
@@ -405,8 +454,8 @@ async function caricaOrdiniUtente() {
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold m-0 text-primary">Ordine del ${dataFormattata}</h6>
-                            <span class="badge ${coloreBadge}">${ordine.stato}</span>
+                            <h6 class="fw-bold m-0 text-primary">Ordine del ${escapeHTML(dataFormattata)}</h6>
+                            <span class="badge ${coloreBadge}">${escapeHTML(ordine.stato)}</span>
                         </div>
                         <ul class="list-unstyled mb-0">
                             ${listaPiatti}
@@ -414,7 +463,7 @@ async function caricaOrdiniUtente() {
                         ${extraUi}
                     </div>
                     <div class="card-footer bg-light border-top-0 d-flex justify-content-between align-items-center">
-                        <span class="text-muted small" style="font-size: 0.7rem;">ID: ${String(ordine._id).substring(0, 8)}...</span>
+                        <span class="text-muted small" style="font-size: 0.7rem;">ID: ${escapeHTML(String(ordine._id).substring(0, 8))}...</span>
                         <h5 class="fw-bold text-success m-0">${ordine.prezzoTotale.toFixed(2)} €</h5>
                     </div>
                 </div>
@@ -423,26 +472,9 @@ async function caricaOrdiniUtente() {
         }).join('');
     } catch (error) {
         console.error("Errore recupero ordini:", error);
-    }
-}
-
-async function confermaRicezioneCliente(idOrdine) {
-    if(!confirm("Confermi di aver ricevuto l'ordine?")) return;
-
-    try {
-        const response = await fetch(`http://localhost:3000/api/orders/${idOrdine}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stato: 'Consegnato' })
-        });
-
-        if (response.ok) {
-            alert('Grazie per aver confermato! Buon appetito!');
-            await caricaOrdiniUtente();
-        } else {
-            alert('Errore di comunicazione col server.');
+        const contenitore = document.getElementById('ordini-container');
+        if (contenitore) {
+            contenitore.innerHTML = '<div class="col-12"><p class="text-danger text-center w-100 py-5">Errore di connessione al server. Riprova più tardi.</p></div>';
         }
-    } catch (error) {
-        console.error("Errore:", error);
     }
 }

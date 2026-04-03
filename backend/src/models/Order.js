@@ -14,11 +14,11 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     prezzoTotale: { type: Number, required: true },
-    indirizzoConsegna: { type: String, default: 'Da concordare / Ritiro in sede' },
+    indirizzoConsegna: { type: String, default: 'Ritiro in sede' },
     stato: {
         type: String,
-        enum: ['In attesa', 'In preparazione', 'In consegna', 'Consegnato'],
-        default: 'In preparazione',
+        enum: ['In attesa', 'In preparazione', 'Consegnato'],
+        default: 'In attesa',
     },
     ristoratoreId: { type: String, default: 'System' },
     tempoAttesa: { type: Number, default: 15 },

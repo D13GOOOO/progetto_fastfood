@@ -194,4 +194,132 @@ router.get('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/restaurants/titolare/{id}:
+ *   get:
+ *     summary: Recupera un ristorante tramite l'ID del titolare
+ *     description: Restituisce i dettagli del ristorante associato all'ID del titolare fornito.
+ *     tags: [Restaurants]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID (ObjectId) dell'utente ristoratore titolare
+ *     responses:
+ *       200:
+ *         description: Ristorante trovato con successo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               description: Dettagli del ristorante trovato (o null se non trovato)
+ *       500:
+ *         description: Errore interno del server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Errore nel recupero del ristorante"
+ *                 error:
+ *                   type: string
+ *                   description: Messaggio di errore tecnico
+ */
+router.get('/titolare/:id', async (req, res) => {
+    try {
+        const ristorante = await Restaurant.findOne({ titolare: req.params.id });
+        res.status(200).json(ristorante);
+    } catch (error) {
+        res.status(500).json({ message: 'Errore nel recupero del ristorante', error: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/restaurants/{id}:
+ *   put:
+ *     summary: Aggiorna un ristorante esistente
+ *     description: Modifica i dati di un ristorante esistente specificandone l'ID.
+ *     tags: [Restaurants]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'ID (ObjectId) del ristorante da aggiornare
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: I campi del ristorante che si desidera aggiornare
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               indirizzo:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *               partitaIva:
+ *                 type: string
+ *               menu:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Ristorante aggiornato con successo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ristorante aggiornato con successo!"
+ *                 ristorante:
+ *                   type: object
+ *                   description: I dati aggiornati del ristorante
+ *       404:
+ *         description: Ristorante non trovato
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ristorante non trovato"
+ *       500:
+ *         description: Errore interno del server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Errore durante l'aggiornamento"
+ *                 error:
+ *                   type: string
+ */
+router.put('/:id', async (req, res) => {
+    try {
+        const ristoranteAggiornato = await Restaurant.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!ristoranteAggiornato) {
+            return res.status(404).json({ message: 'Ristorante non trovato' });
+        }
+        res.status(200).json({ message: 'Ristorante aggiornato con successo!', ristorante: ristoranteAggiornato });
+    } catch (error) {
+        res.status(500).json({ message: 'Errore durante l\'aggiornamento', error: error.message });
+    }
+});
+
 module.exports = router;

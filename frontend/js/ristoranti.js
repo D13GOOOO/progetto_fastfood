@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function caricaRistoranti() {
     try {
-        const response = await fetch('http://localhost:3000/api/restaurants');
+        const response = await fetch(`${API_URL}/restaurants`);
+
+        if (!response.ok) throw new Error("Errore nel recupero dei ristoranti");
 
         ristorantiOriginali = await response.json();
 
@@ -46,16 +48,16 @@ function renderizzaRistoranti(ristoranti) {
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title fw-bold text-primary mb-0">${rist.nome}</h5>
-                            <span class="badge bg-light text-dark border">P.IVA: ${rist.partitaIva}</span>
+                            <h5 class="card-title fw-bold text-primary mb-0">${escapeHTML(rist.nome)}</h5>
+                            <span class="badge bg-light text-dark border">P.IVA: ${escapeHTML(rist.partitaIva)}</span>
                         </div>
                         <p class="text-muted small mb-3">
-                            📍 ${rist.indirizzo}<br>
-                            📞 ${rist.telefono}
+                            📍 ${escapeHTML(rist.indirizzo)}<br>
+                            📞 ${escapeHTML(rist.telefono)}
                         </p>
                         <div class="mt-auto">
-                            <p class="small text-muted mb-2">Gestito da: ${nomeTitolare}</p>
-                            <a href="index.html?ristoratore=${idTitolare}" class="btn btn-outline-danger w-100 fw-bold">Vai al Menu</a>
+                            <p class="small text-muted mb-2">Gestito da: ${escapeHTML(nomeTitolare)}</p>
+                            <a href="index.html?ristoratore=${escapeHTML(String(idTitolare))}" class="btn btn-outline-danger w-100 fw-bold">Vai al Menu</a>
                         </div>
                     </div>
                 </div>

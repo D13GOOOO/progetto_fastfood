@@ -1,3 +1,5 @@
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api';
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
 
@@ -9,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('http://localhost:3000/api/users/login', {
+                const response = await fetch(`${API_URL}/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -51,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const preferenze = document.getElementById('reg-preferenze').value;
 
             try {
-                const response = await fetch('http://localhost:3000/api/users/register', {
+                const response = await fetch(`${API_URL}/users/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, cognome, email, password, ruolo, preferenze })

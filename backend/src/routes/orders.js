@@ -113,7 +113,7 @@ router.post('/', async (req, res) => {
             utente: utenteId,
             piatti: piattiFormattati,
             prezzoTotale: totale,
-            stato: stato || 'In preparazione',
+            stato: stato || 'In attesa',
             ristoratoreId: ristoId,
             tempoAttesa: tempoAttesaStimato
         });
@@ -288,10 +288,10 @@ router.get('/', async (req, res) => {
 router.put('/:id/status', async (req, res) => {
     try {
         const { stato } = req.body;
+        const statiValidi = ['In attesa', 'In preparazione', 'Consegnato'];
 
-        const statiValidi = ['In attesa', 'In preparazione', 'In consegna', 'Consegnato'];
         if (!statiValidi.includes(stato)) {
-            return res.status(400).json({ message: 'Stato della consegna non valido.' });
+            return res.status(400).json({ message: 'Stato dell\'ordine non valido.' });
         }
 
         const ordineAggiornato = await Order.findByIdAndUpdate(
@@ -304,9 +304,15 @@ router.put('/:id/status', async (req, res) => {
             return res.status(404).json({ message: 'Ordine non trovato.' });
         }
 
-        res.status(200).json({ message: 'Stato della consegna aggiornato con successo!', ordine: ordineAggiornato });
+        res.status(200).json({
+            message: 'Stato dell\'ordine aggiornato con successo!',
+            ordine: ordineAggiornato
+        });
     } catch (error) {
-        res.status(500).json({ message: "Errore nell'aggiornamento della consegna", error: error.message });
+        res.status(500).json({
+            message: "Errore nell'aggiornamento dello stato",
+            error: error.message
+        });
     }
 });
 

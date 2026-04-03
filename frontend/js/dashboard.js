@@ -1,10 +1,26 @@
 /* global bootstrap */
 
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+    ? 'http://localhost:3000/api' 
+    : `${window.location.origin}/api`;
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 let mioMenuGlobale = [];
+let mioRistoranteId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     controllaAccessoRistoratore();
     caricaOrdini().catch(console.error);
+    caricaDatiRistorante(); // Assicura che i dati vengano caricati all'avvio
 
     const formRistorante = document.getElementById('form-ristorante');
     if (formRistorante) {
@@ -29,6 +45,33 @@ document.addEventListener('DOMContentLoaded', () => {
             eliminaPiattoDalMenu(idMeal);
         });
     }
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', esci);
+    }
+
+    // Global event delegation
+    document.body.addEventListener('change', (e) => {
+        if (e.target.classList.contains('select-stato-ordine')) {
+            const idOrdine = e.target.getAttribute('data-id');
+            aggiornaStato(idOrdine, e.target.value);
+        }
+    });
+
+    document.body.addEventListener('click', (e) => {
+        const btnCopia = e.target.closest('.btn-copia-piatto');
+        if (btnCopia) {
+            const idMeal = btnCopia.getAttribute('data-id');
+            copiaPiattoNelMenu(idMeal);
+        }
+
+        const btnGestisci = e.target.closest('.btn-gestisci-piatto');
+        if (btnGestisci) {
+            const idMeal = btnGestisci.getAttribute('data-id');
+            apriModalGestisciPiatto(idMeal);
+        }
+    });
 });
 
 function controllaAccessoRistoratore() {
@@ -62,7 +105,8 @@ async function caricaOrdini() {
         if (!utenteSalvato) return;
 
         const datiUtente = JSON.parse(utenteSalvato);
-        const response = await fetch(`http://localhost:3000/api/orders?ristoratoreId=${datiUtente.utente.id}`);
+        const response = await fetch(`${API_URL}/orders?ristoratoreId=${datiUtente.utente.id}`);
+        if (!response.ok) throw new Error('Errore di rete durante il recupero ordini');
         const ordini = await response.json();
         const tbody = document.getElementById('tabella-ordini');
 
@@ -99,15 +143,16 @@ async function caricaOrdini() {
             const dataFormattata = new Date(ordine.dataOrdine).toLocaleString('it-IT', {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'
             });
-            const piattiList = ordine.piatti.map(p => `${p.quantita}x ${p.nomePiatto}`).join('<br>');
-            const nomeCliente = ordine.utente ? `${ordine.utente.nome} ${ordine.utente.cognome}` : 'Cliente Sconosciuto';
+            const piattiList = ordine.piatti.map(p => `${escapeHTML(p.quantita)}x ${escapeHTML(p.nomePiatto)}`).join('<br>');
+            const nomeCliente = ordine.utente ? `${escapeHTML(ordine.utente.nome)} ${escapeHTML(ordine.utente.cognome)}` : 'Cliente Sconosciuto';
 
             let selectStato;
             if (ordine.stato !== 'Consegnato') {
-                const stati = ['In attesa', 'In preparazione', 'In consegna', 'Consegnato'];
+                // Abbiamo rimosso 'In consegna' per adattarlo al progetto singolo
+                const stati = ['In attesa', 'In preparazione', 'Consegnato'];
                 selectStato = `
-                    <select class="form-select form-select-sm w-auto" onchange="aggiornaStato('${String(ordine._id)}', this.value)">
-                        ${stati.map(s => `<option value="${s}" ${ordine.stato === s ? 'selected' : ''}>${s}</option>`).join('')}
+                    <select class="form-select form-select-sm w-auto select-stato-ordine" data-id="${escapeHTML(String(ordine._id))}">
+                        ${stati.map(s => `<option value="${escapeHTML(s)}" ${ordine.stato === s ? 'selected' : ''}>${escapeHTML(s)}</option>`).join('')}
                     </select>
                 `;
             } else {
@@ -116,11 +161,11 @@ async function caricaOrdini() {
 
             return `
                 <tr>
-                    <td class="small text-muted">${dataFormattata}</td>
+                    <td class="small text-muted">${escapeHTML(dataFormattata)}</td>
                     <td class="fw-bold">${nomeCliente}</td>
                     <td class="small">${piattiList}</td>
-                    <td class="fw-bold text-success">${ordine.prezzoTotale.toFixed(2)} €</td>
-                    <td><span class="badge bg-secondary">${ordine.stato}</span></td>
+                    <td class="fw-bold text-success">${escapeHTML(ordine.prezzoTotale.toFixed(2))} €</td>
+                    <td><span class="badge bg-secondary">${escapeHTML(ordine.stato)}</span></td>
                     <td>${selectStato}</td>
                 </tr>
             `;
@@ -137,11 +182,13 @@ async function caricaOrdini() {
 
 async function aggiornaStato(idOrdine, nuovoStato) {
     try {
-        const response = await fetch(`http://localhost:3000/api/orders/${idOrdine}/status`, {
+        const response = await fetch(`${API_URL}/orders/${idOrdine}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ stato: nuovoStato })
         });
+
+        if (!response.ok) throw new Error('Errore nella risposta del server');
 
         if (response.ok) {
             await caricaOrdini();
@@ -162,20 +209,34 @@ async function salvaRistorante(evento) {
         partitaIva: document.getElementById('rest-piva').value,
         indirizzo: document.getElementById('rest-indirizzo').value,
         telefono: document.getElementById('rest-telefono').value,
-        titolare: datiUtente.utente.id,
-        menu: []
+        titolare: datiUtente.utente.id
     };
 
     try {
-        const response = await fetch('http://localhost:3000/api/restaurants', {
-            method: 'POST',
+        let url = `${API_URL}/restaurants`;
+        let metodo = 'POST';
+
+        if (typeof mioRistoranteId !== 'undefined' && mioRistoranteId !== null) {
+            url = `${API_URL}/restaurants/${mioRistoranteId}`;
+            metodo = 'PUT';
+        } else {
+            payload.menu = [];
+        }
+
+        const response = await fetch(url, {
+            method: metodo,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
         if (response.ok) {
+            const data = await response.json();
+
+            if (!mioRistoranteId && data.ristorante && data.ristorante._id) {
+                mioRistoranteId = data.ristorante._id;
+            }
+
             alert('Dati del ristorante salvati con successo!');
-            evento.target.reset();
         } else {
             alert('Errore durante il salvataggio.');
         }
@@ -204,7 +265,7 @@ async function salvaPiatto(evento) {
     };
 
     try {
-        const response = await fetch('http://localhost:3000/api/meals', {
+        const response = await fetch(`${API_URL}/meals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -230,7 +291,8 @@ setTimeout(() => {
 
 async function caricaCatalogo() {
     try {
-        const response = await fetch('http://localhost:3000/api/meals');
+        const response = await fetch(`${API_URL}/meals`);
+        if (!response.ok) throw new Error('Errore nel recupero del catalogo');
         const tuttiIPiatti = await response.json();
 
         catalogoDiSistema = tuttiIPiatti.filter(p => !p.creatore || p.creatore === 'System');
@@ -247,13 +309,13 @@ async function caricaCatalogo() {
             return `
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
-                        <img src="${piatto.strMealThumb}" class="card-img-top" alt="${piatto.strMeal}" style="height: 160px; object-fit: cover;">
+                        <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 160px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150'">
                         <div class="card-body d-flex flex-column p-3">
-                            <h6 class="fw-bold mb-2">${piatto.strMeal}</h6>
-                            <div><span class="badge bg-secondary mb-3">${piatto.strCategory}</span></div>
+                            <h6 class="fw-bold mb-2">${escapeHTML(piatto.strMeal)}</h6>
+                            <div><span class="badge bg-secondary mb-3">${escapeHTML(piatto.strCategory)}</span></div>
                             <div class="mt-auto">
-                                <p class="text-success fw-bold mb-3">${piatto.prezzo ? piatto.prezzo.toFixed(2) : "0.00"} €</p>
-                                <button class="btn btn-sm btn-success w-100 fw-bold" onclick="copiaPiattoNelMenu('${String(piatto.idMeal)}')">
+                                <p class="text-success fw-bold mb-3">${piatto.prezzo ? escapeHTML(piatto.prezzo.toFixed(2)) : "0.00"} €</p>
+                                <button class="btn btn-sm btn-success w-100 fw-bold btn-copia-piatto" data-id="${escapeHTML(String(piatto.idMeal))}">
                                     + Aggiungi al mio Menu
                                 </button>
                             </div>
@@ -295,11 +357,13 @@ async function copiaPiattoNelMenu(idPiattoBase) {
     };
 
     try {
-        const response = await fetch('http://localhost:3000/api/meals', {
+        const response = await fetch(`${API_URL}/meals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        if (!response.ok) throw new Error('Errore durante la copia del piatto nel db');
 
         if (response.ok) {
             alert(`"${piattoScelto.strMeal}" aggiunto al tuo menu!`);
@@ -315,7 +379,8 @@ async function copiaPiattoNelMenu(idPiattoBase) {
 async function caricaMioMenu() {
     try {
         const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
-        const response = await fetch('http://localhost:3000/api/meals');
+        const response = await fetch(`${API_URL}/meals`);
+        if (!response.ok) throw new Error('Errore nel recupero del menu');
         const tuttiIPiatti = await response.json();
 
         mioMenuGlobale = tuttiIPiatti.filter(p => String(p.creatore) === String(datiUtente.utente.id));
@@ -348,12 +413,13 @@ async function caricaMioMenu() {
             return `
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
-                        <img src="${piatto.strMealThumb}" class="card-img-top" alt="${piatto.strMeal}" style="height: 160px; object-fit: cover;">
+                        <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 160px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150'">
                         <div class="card-body d-flex flex-column p-3">
-                            <h6 class="fw-bold mb-2 text-truncate" title="${piatto.strMeal}">${piatto.strMeal}</h6>
-                            <div><span class="badge bg-secondary mb-3">${piatto.strCategory}</span></div>
+                            <h6 class="fw-bold mb-2 text-truncate" title="${escapeHTML(piatto.strMeal)}">${escapeHTML(piatto.strMeal)}</h6>
+                            <div><span class="badge bg-secondary mb-3">${escapeHTML(piatto.strCategory)}</span></div>
                             <div class="mt-auto">
                                 ${infoPrezzo}
+                                <button class="btn btn-sm btn-outline-primary w-100 fw-bold btn-gestisci-piatto" data-id="${escapeHTML(String(piatto.idMeal))}
                                 <button class="btn btn-sm btn-outline-primary w-100 fw-bold" onclick="apriModalGestisciPiatto('${String(piatto.idMeal)}')">
                                     Gestisci
                                 </button>
@@ -374,9 +440,11 @@ async function eliminaPiattoDalMenu(idMeal) {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/meals/${idMeal}`, {
+        const response = await fetch(`${API_URL}/meals/${idMeal}`, {
             method: 'DELETE'
         });
+
+        if (!response.ok) throw new Error('Errore durante eliminazione');
 
         if (response.ok) {
             // Chiude il modal prima di ricaricare il menu
@@ -435,11 +503,13 @@ async function salvaModifichePiatto(evento) {
     };
 
     try {
-        const response = await fetch(`http://localhost:3000/api/meals/${idMeal}`, {
+        const response = await fetch(`${API_URL}/meals/${idMeal}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        if (!response.ok) throw new Error('Errore durante la modifica del piatto');
 
         if (response.ok) {
             const modalEl = document.getElementById('modalGestisciPiatto');
@@ -452,5 +522,32 @@ async function salvaModifichePiatto(evento) {
         }
     } catch (error) {
         console.error("Errore salvataggio piatto:", error);
+    }
+}
+
+async function caricaDatiRistorante() {
+    const utenteSalvato = localStorage.getItem('utenteLoggato');
+    if (!utenteSalvato) return;
+
+    const datiUtente = JSON.parse(utenteSalvato);
+
+    try {
+        const response = await fetch(`${API_URL}/restaurants/titolare/${datiUtente.utente.id}`);
+        if (!response.ok) throw new Error('Errore nel recupero dati ristorante');
+
+        if (response.ok) {
+            const ristorante = await response.json();
+
+            if (ristorante && ristorante._id) {
+                mioRistoranteId = ristorante._id;
+
+                document.getElementById('rest-nome').value = ristorante.nome || '';
+                document.getElementById('rest-piva').value = ristorante.partitaIva || '';
+                document.getElementById('rest-indirizzo').value = ristorante.indirizzo || '';
+                document.getElementById('rest-telefono').value = ristorante.telefono || '';
+            }
+        }
+    } catch (error) {
+        console.error("Nessun ristorante trovato o errore di connessione:", error);
     }
 }
