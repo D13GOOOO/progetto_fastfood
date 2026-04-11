@@ -6,75 +6,114 @@
     <title>Fast Food Express - Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html">FastFood Express</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" href="index.html">Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="ristoranti.html">Ristoranti</a></li>
-                <li class="nav-item">
-                    <a class="nav-link text-warning fw-bold" href="#" data-bs-toggle="offcanvas" data-bs-target="#carrelloOffcanvas">
-                        Carrello <span id="contatore-carrello" class="badge bg-light text-dark ms-1">0</span>
-                    </a>
-                </li>
-                <li class="nav-item dropdown" id="area-utente">
-                    <a class="nav-link" href="login.html">Accedi</a>
-                </li>
-            </ul>
+<div class="top-bar py-1 d-none d-lg-block shadow-sm" style="background-color: var(--dark-bg); position: relative; z-index: 1050;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <ul class="nav top-nav-links">
+            <li class="nav-item"><a href="index.html" class="nav-link text-light ps-0 pe-3 fw-medium">Home</a></li>
+            <li class="nav-item"><a href="index.html" class="nav-link text-light px-3 fw-medium">Menu</a></li>
+            <li class="nav-item"><a href="ristoranti.html" class="nav-link text-light px-3 fw-medium">Ristoranti</a></li>
+        </ul>
+        <div class="d-flex align-items-center" id="area-utente">
+            <a href="login.html" class="text-light text-decoration-none fw-bold d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle fs-5"></i> Login
+            </a>
         </div>
     </div>
-</nav>
+</div>
 
-<header class="container mt-5 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-    <div>
-        <h2 class="fw-bold mb-0 fs-2" style="color: var(--text-main);">Il nostro Menu</h2>
-        <p class="text-muted mb-0">Veloce, caldo e direttamente a casa tua.</p>
+<header class="main-header bg-white sticky-top py-3 border-bottom shadow-sm" style="z-index: 1040;">
+    <div class="container d-flex justify-content-between align-items-center">
+        
+        <div class="social-links d-none d-md-flex gap-4 text-muted fs-5" style="margin-left: -5px;"> 
+            <a href="#" class="text-muted"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-muted"><i class="bi bi-linkedin"></i></a>
+            <a href="#" class="text-muted"><i class="bi bi-google"></i></a>
+        </div>
+
+        <div class="brand-center text-center">
+            <a href="index.html" class="text-decoration-none d-flex align-items-center gap-2">
+                <div class="logo-icon bg-danger text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 45px; height: 45px;">
+                    <i class="bi bi-shop fs-4"></i>
+                </div>
+                <div class="text-start">
+                    <h3 class="m-0 fw-bold text-dark" style="font-family: serif; letter-spacing: -0.5px;">FastFood</h3>
+                    <small class="text-muted fw-bold" style="letter-spacing: 2px; font-size: 0.65rem; text-transform: uppercase;">Express Delivery</small>
+                </div>
+            </a>
+        </div>
+
+        <div class="header-actions d-flex align-items-center gap-4">
+            
+            <a href="#collapseRicerca" class="text-dark text-decoration-none d-flex align-items-center" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseRicerca">
+                <div class="d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                    <i class="bi bi-search fs-4 m-0" style="line-height: 1;"></i>
+                </div>
+            </a>
+            
+            <div class="vr d-none d-md-block bg-secondary" style="height: 38px; width: 1.5px; opacity: 0.25;"></div>
+            
+            <a href="#carrelloOffcanvas" class="text-dark text-decoration-none d-flex align-items-center" data-bs-toggle="offcanvas" role="button" aria-controls="carrelloOffcanvas">
+                <div class="position-relative d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                    <i class="bi bi-bag fs-4 m-0" style="line-height: 1;"></i>
+                    <span id="contatore-carrello" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.65rem; margin-top: 2px;">0</span>
+                </div>
+            </a>
+
+            <button class="navbar-toggler d-lg-none border-0 bg-transparent text-dark p-0 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                <i class="bi bi-list m-0 fs-2" style="line-height: 1;"></i>
+            </button>
+        </div>
     </div>
-    <button class="btn btn-outline-secondary bg-white border rounded-pill px-4 py-2 shadow-sm text-muted d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRicerca" aria-expanded="false" aria-controls="collapseRicerca" style="width: 250px;">
-        <span>Cerca piatto...</span>
-        <span>▼</span>
-    </button>
 </header>
 
+<div class="collapse d-lg-none bg-dark text-white p-3 shadow" id="mobileMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item"><a href="index.html" class="nav-link text-white">Menu</a></li>
+        <li class="nav-item"><a href="ristoranti.html" class="nav-link text-white">Ristoranti</a></li>
+    </ul>
+</div>
+
 <div class="collapse" id="collapseRicerca">
-    <div class="container pb-4">
-        <div class="card shadow-sm border-0 p-4 bg-white rounded-3">
-            <form id="form-ricerca" class="row g-3 align-items-end">
+    <div class="container mt-4 mb-2">
+        <div class="card shadow-sm border-0 p-3 bg-white" style="border-radius: 12px;">
+            <form id="form-ricerca" class="row g-2 align-items-center">
                 <div class="col-md-3">
-                    <label for="filtro-nome" class="form-label text-muted small fw-bold">Nome Piatto</label>
-                    <input type="text" id="filtro-nome" class="form-control" placeholder="Es. Panino...">
+                    <label for="filtro-nome" class="form-label text-muted small fw-bold mb-1 ms-1 d-none">Nome Piatto</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" id="filtro-nome" class="form-control bg-light border-start-0" placeholder="Cerca piatto...">
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="filtro-categoria" class="form-label text-muted small fw-bold">Categoria</label>
-                    <select id="filtro-categoria" class="form-select">
+                    <label for="filtro-categoria" class="form-label text-muted small fw-bold mb-1 ms-1 d-none">Categoria</label>
+                    <select id="filtro-categoria" class="form-select bg-light">
                         <option value="">Tutte le categorie</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="filtro-prezzo" class="form-label text-muted small fw-bold">Prezzo Max (€)</label>
-                    <input type="number" step="0.50" id="filtro-prezzo" class="form-control" placeholder="Es. 15">
+                    <label for="filtro-prezzo" class="form-label text-muted small fw-bold mb-1 ms-1 d-none">Prezzo Max</label>
+                    <input type="number" step="0.50" id="filtro-prezzo" class="form-control bg-light" placeholder="Prezzo Max €">
                 </div>
                 <div class="col-md-3">
-                    <label for="filtro-ingrediente" class="form-label text-muted small fw-bold">Ingrediente</label>
-                    <input type="text" id="filtro-ingrediente" class="form-control" placeholder="Es. Beef, Cheese...">
+                    <label for="filtro-ingrediente" class="form-label text-muted small fw-bold mb-1 ms-1 d-none">Ingrediente</label>
+                    <input type="text" id="filtro-ingrediente" class="form-control bg-light" placeholder="Ingrediente (Es. Beef)">
                 </div>
-                <div class="col-md-1 d-flex gap-2">
-                    <button type="submit" class="btn btn-danger w-100 fw-bold">Vai</button>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold rounded-3 h-100">Vai</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="container">
+<div class="container mt-4">  
     <div id="menu-container" class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col-12 text-center">
             <div class="spinner-border text-danger" role="status"></div>
@@ -83,10 +122,10 @@
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="carrelloOffcanvas" aria-labelledby="carrelloLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="carrelloOffcanvas" aria-labelledby="carrelloLabel" style="z-index: 1060;">
     <div class="offcanvas-header offcanvas-fastfood-header">
         <h5 class="offcanvas-title fw-bold" id="carrelloLabel">Il tuo Ordine</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <ul id="lista-carrello" class="list-group mb-auto">

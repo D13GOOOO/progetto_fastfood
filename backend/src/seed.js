@@ -3,12 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const Meal = require('./models/Meal');
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fastfood';
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+
+const mongoURI = process.env.MONGO_URI;
 
 mongoose
     .connect(mongoURI)
     .then(async () => {
-        console.log('Connesso a MongoDB. Importazione in corso...');
+        console.log('Connesso a MongoDB Atlas. Importazione in corso...');
 
         try {
             const filePath = path.join(__dirname, '../data/meals 1.json');
@@ -26,15 +28,15 @@ mongoose
             });
 
             await Meal.insertMany(piattiPuliti);
-            console.log(`${piattiPuliti.length} piatti inseriti correttamente.`);
+            console.log(`${piattiPuliti.length} piatti inseriti correttamente nel Cloud.`);
 
         } catch (error) {
             console.error('Errore importazione:', error);
         } finally {
             await mongoose.disconnect();
-            console.log('Operazione terminata.');
+            console.log('Operazione terminata e disconnesso da Atlas.');
         }
     })
     .catch((errore) => {
-        console.error('Errore connessione MongoDB:', errore);
+        console.error('Errore connessione MongoDB Atlas:', errore);
     });

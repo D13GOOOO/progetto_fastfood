@@ -1,6 +1,6 @@
 /* global bootstrap */
 
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api';
+const API_URL = 'http://localhost:3000/api';
 
 let menuOriginale = [];
 let carrello = JSON.parse(localStorage.getItem('carrelloFastFood')) || [];
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPaga.addEventListener('click', inviaOrdine);
     }
     
-    // Event delegation per i bottoni "Aggiungi al carrello"
     const menuContainer = document.getElementById('menu-container');
     if (menuContainer) {
         menuContainer.addEventListener('click', (e) => {
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Funzione di utilità per calcolare il prezzo reale (DRY)
 function calcolaPrezzoReale(piatto) {
     let prezzo = piatto.prezzo || 0;
     if (piatto.scontoPercentuale > 0 && piatto.scontoScadenza) {
@@ -44,7 +42,6 @@ function calcolaPrezzoReale(piatto) {
     return prezzo;
 }
 
-// Prevenzione XSS di base
 function escapeHTML(str) {
     if (!str) return "";
     return String(str).replace(/[&<>'"]/g, tag => ({
@@ -63,26 +60,33 @@ function controllaLogin() {
     if (utenteSalvato && areaUtente) {
         const dati = JSON.parse(utenteSalvato);
 
-        let linkAreaPrivata = `<li><a class="dropdown-item" href="ordini.html">I miei ordini</a></li>`;
+        let linkAreaPrivata = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="ordini.html"><i class="bi bi-box-seam me-2 text-muted"></i>I miei ordini</a></li>`;
         if (dati.utente.ruolo === 'ristoratore') {
-            linkAreaPrivata = `<li><a class="dropdown-item" href="dashboard.html">Area Ristoratore</a></li>`;
+            linkAreaPrivata = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="dashboard.html"><i class="bi bi-graph-up me-2 text-muted"></i>Area Ristoratore</a></li>`;
         }
 
-        const linkProfilo = `<li><a class="dropdown-item" href="profilo.html">Il mio Profilo</a></li>`;
+        const linkProfilo = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="profilo.html"><i class="bi bi-person me-2 text-muted"></i>Il mio Profilo</a></li>`;
 
+        // FIX ALLINEAMENTO: Sostituito il toggle standard con un flexbox personalizzato e aggiunto offset al menu
         areaUtente.innerHTML = `
-            <a class="nav-link dropdown-toggle fw-bold text-success" href="#" role="button" data-bs-toggle="dropdown">
-                Ciao, ${escapeHTML(dati.utente.nome)}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                ${linkProfilo} 
-                ${linkAreaPrivata}
-                <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item text-danger fw-bold" id="btn-logout">Logout</button></li>
-            </ul>
+            <div class="dropdown">
+                <a class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>Ciao, ${escapeHTML(dati.utente.nome)}</span>
+                    <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem; padding-top: 2px;"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="border-radius: 16px; min-width: 220px; margin-top: 14px !important;">
+                    <li class="px-3 py-2 mb-2 bg-light rounded-3 d-flex flex-column">
+                        <small class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Loggato come</small>
+                        <strong class="text-dark">${escapeHTML(dati.utente.nome)}</strong>
+                    </li>
+                    ${linkProfilo}
+                    ${linkAreaPrivata}
+                    <li><hr class="dropdown-divider my-2"></li>
+                    <li><button class="dropdown-item py-2 text-danger fw-bold custom-dropdown-item btn-logout-custom" id="btn-logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
+                </ul>
+            </div>
         `;
         
-        // Colleghiamo l'evento click per il logout via JavaScript
         document.getElementById('btn-logout').addEventListener('click', esci);
     }
 }
@@ -154,17 +158,17 @@ function renderizzaMenu(piatti) {
     contenitore.innerHTML = piatti.map(piatto => {
         const prezzoScontato = calcolaPrezzoReale(piatto);
         
-        let bloccoPrezzo = `<h6 class="fw-bold text-success mb-3">${prezzoScontato.toFixed(2)} €</h6>`;
+        let bloccoPrezzo = `<h4 class="fw-bold text-success m-0">${prezzoScontato.toFixed(2)} €</h4>`;
         let badgeSconto = '';
 
         if (prezzoScontato < (piatto.prezzo || 0)) {
             bloccoPrezzo = `
-                <div class="mb-3">
-                    <span class="text-muted text-decoration-line-through small me-2">${piatto.prezzo.toFixed(2)} €</span>
-                    <h6 class="fw-bold text-danger d-inline">${prezzoScontato.toFixed(2)} €</h6>
+                <div class="d-flex flex-column">
+                    <span class="text-muted text-decoration-line-through lh-1" style="font-size: 0.8rem;">${piatto.prezzo.toFixed(2)} €</span>
+                    <h4 class="fw-bold text-danger m-0 lh-1 mt-1">${prezzoScontato.toFixed(2)} €</h4>
                 </div>
             `;
-            badgeSconto = `<span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2 shadow-sm fs-6">-${piatto.scontoPercentuale}%</span>`;
+            badgeSconto = `<span class="position-absolute top-0 start-0 badge bg-warning text-dark m-3 shadow-sm fs-6 rounded-pill">-${piatto.scontoPercentuale}%</span>`;
         }
 
         const ristorante = ristorantiGlobali.find(r =>
@@ -173,26 +177,83 @@ function renderizzaMenu(piatti) {
         );
         const nomeRistorante = ristorante ? ristorante.nome : "Ristorante Partner";
 
+        const badgeArea = piatto.strArea 
+            ? `<span class="badge bg-light text-secondary border rounded-pill">#${escapeHTML(piatto.strArea.toLowerCase())}</span>` 
+            : '';
+
         return `
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm position-relative">
-                    ${badgeSconto}
-                    <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title fw-bold m-0">${escapeHTML(piatto.strMeal)}</h5>
-                            <span class="badge bg-danger">${escapeHTML(piatto.strCategory)}</span>
+                <div class="card h-100 shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+                    
+                    <div class="position-relative">
+                        ${badgeSconto}
+                        <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 220px; object-fit: cover; cursor: pointer;" onclick="mostraIstruzioni('${piatto.idMeal}')" title="Clicca per la ricetta">
+                    </div>
+
+                    <div class="card-body d-flex flex-column p-4">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
+                            <h5 class="card-title fw-bold m-0 lh-sm text-dark">${escapeHTML(piatto.strMeal)}</h5>
+                            <a href="#" class="text-muted text-decoration-none flex-shrink-0" onclick="mostraIstruzioni('${piatto.idMeal}'); return false;" title="Leggi Ricetta">
+                                <i class="bi bi-info-circle fs-5" style="transition: color 0.2s;" onmouseover="this.style.color='var(--accent-color)'" onmouseout="this.style.color=''"></i>
+                            </a>
                         </div>
-                        <p class="text-muted small mb-3">👨‍🍳 Preparato da: <strong>${escapeHTML(nomeRistorante)}</strong></p>
-                        ${bloccoPrezzo}
-                        <button class="btn btn-primary w-100 mt-auto fw-bold btn-aggiungi-carrello" data-id="${piatto.idMeal}">
-                            Aggiungi al Carrello
-                        </button>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-danger rounded-pill">#${escapeHTML(piatto.strCategory.toLowerCase())}</span>
+                            ${badgeArea}
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-muted mb-4" style="font-size: 0.9rem;">
+                            <i class="bi bi-shop me-2 opacity-75"></i>
+                            <span>da <strong class="text-dark">${escapeHTML(nomeRistorante)}</strong></span>
+                        </div>
+
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                            ${bloccoPrezzo}
+                            <button class="btn btn-primary fw-bold rounded-pill shadow-sm px-4 btn-aggiungi-carrello" data-id="${piatto.idMeal}">
+                                + Aggiungi
+                            </button>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+function mostraIstruzioni(id) {
+    const piatto = menuOriginale.find(p => String(p.idMeal) === String(id));
+    if (!piatto) return;
+    
+    let modalElement = document.getElementById('modalRicetta');
+    if (!modalElement) {
+        modalElement = document.createElement('div');
+        modalElement.id = 'modalRicetta';
+        modalElement.className = 'modal fade';
+        modalElement.setAttribute('tabindex', '-1');
+        modalElement.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold fs-4" id="modalRicettaTitolo"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <p id="modalRicettaTesto" class="text-muted" style="white-space: pre-wrap; line-height: 1.7; font-size: 0.95rem;"></p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalElement);
+    }
+
+    document.getElementById('modalRicettaTitolo').innerText = piatto.strMeal;
+    document.getElementById('modalRicettaTesto').textContent = piatto.strInstructions;
+
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
 }
 
 function applicaFiltri(e) {
@@ -232,7 +293,6 @@ function aggiungiAlCarrello(id, event) {
 
         const piattoDaCarrello = JSON.parse(JSON.stringify(piattoScelto));
 
-
         carrello.push(piattoDaCarrello);
         aggiornaInterfacciaCarrello();
         if (event && event.target) {
@@ -257,21 +317,33 @@ function aggiornaInterfacciaCarrello() {
     if (!lista || !totaleTesto) return;
 
     if (carrello.length === 0) {
-        lista.innerHTML = '<li class="list-group-item text-center text-muted my-4">Il carrello è ancora vuoto!</li>';
+        // Design carrello vuoto moderno
+        lista.innerHTML = `
+            <div class="text-center text-muted my-5 d-flex flex-column align-items-center">
+                <i class="bi bi-bag-x fs-1 mb-3 opacity-25"></i>
+                <span class="fw-medium">Il carrello è ancora vuoto!</span>
+            </div>`;
         totaleTesto.innerText = '0.00 €';
         return;
     }
 
     let totale = 0;
+    
+    // FIX DESIGN CARRELLO PIENO: Layout moderno con foto miniatura, bordi arrotondati, cestino icona
     lista.innerHTML = carrello.map((item, index) => {
         const prezzoScontato = calcolaPrezzoReale(item);
         totale += prezzoScontato;
         return `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span class="text-truncate" style="max-width: 70%;">${escapeHTML(item.strMeal)}</span>
-                <div>
-                    <span class="badge bg-success me-2">${prezzoScontato.toFixed(2)} €</span>
-                    <button class="btn btn-sm btn-outline-danger btn-rimuovi-carrello" data-index="${index}">X</button>
+            <li class="list-group-item border-0 shadow-sm mb-3 p-2 rounded-4 d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
+                <div class="d-flex align-items-center gap-3" style="max-width: 65%;">
+                    <img src="${escapeHTML(item.strMealThumb)}" alt="${escapeHTML(item.strMeal)}" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <span class="text-truncate fw-bold text-dark" style="font-size: 0.95rem;">${escapeHTML(item.strMeal)}</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <strong class="text-success" style="font-size: 1rem;">${prezzoScontato.toFixed(2)} €</strong>
+                    <button class="btn btn-light text-danger rounded-circle p-0 d-flex align-items-center justify-content-center border bg-white shadow-sm btn-rimuovi-carrello" style="width: 32px; height: 32px;" data-index="${index}" title="Rimuovi dal carrello">
+                        <i class="bi bi-trash" style="pointer-events: none; font-size: 0.85rem;"></i>
+                    </button>
                 </div>
             </li>
         `;
@@ -279,7 +351,6 @@ function aggiornaInterfacciaCarrello() {
 
     totaleTesto.innerText = totale.toFixed(2) + ' €';
     
-    // Riapplica event listener per i bottoni rimuovi (dato che abbaimo riscritto il DOM della lista)
     document.querySelectorAll('.btn-rimuovi-carrello').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const index = Number(e.target.getAttribute('data-index'));

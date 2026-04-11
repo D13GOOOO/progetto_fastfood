@@ -1,8 +1,6 @@
 /* global bootstrap */
 
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
-    ? 'http://localhost:3000/api' 
-    : `${window.location.origin}/api`;
+const API_URL = 'http://localhost:3000/api';
 
 function escapeHTML(str) {
     if (!str) return '';
@@ -20,7 +18,7 @@ let mioRistoranteId = null;
 document.addEventListener('DOMContentLoaded', () => {
     controllaAccessoRistoratore();
     caricaOrdini().catch(console.error);
-    caricaDatiRistorante(); // Assicura che i dati vengano caricati all'avvio
+    caricaDatiRistorante(); 
 
     const formRistorante = document.getElementById('form-ristorante');
     if (formRistorante) {
@@ -37,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         formGestisciPiatto.addEventListener('submit', salvaModifichePiatto);
     }
 
-    // Listener per il nuovo tasto elimina dentro al modal
     const btnEliminaModal = document.getElementById('btn-elimina-piatto-modal');
     if (btnEliminaModal) {
         btnEliminaModal.addEventListener('click', () => {
@@ -51,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogout.addEventListener('click', esci);
     }
 
-    // Global event delegation
     document.body.addEventListener('change', (e) => {
         if (e.target.classList.contains('select-stato-ordine')) {
             const idOrdine = e.target.getAttribute('data-id');
@@ -148,7 +144,6 @@ async function caricaOrdini() {
 
             let selectStato;
             if (ordine.stato !== 'Consegnato') {
-                // Abbiamo rimosso 'In consegna' per adattarlo al progetto singolo
                 const stati = ['In attesa', 'In preparazione', 'Consegnato'];
                 selectStato = `
                     <select class="form-select form-select-sm w-auto select-stato-ordine" data-id="${escapeHTML(String(ordine._id))}">
@@ -334,11 +329,10 @@ async function copiaPiattoNelMenu(idPiattoBase) {
     const piattoScelto = catalogoDiSistema.find(p => String(p.idMeal) === String(idPiattoBase));
     if (!piattoScelto) return;
 
-    // CONTROLLO DUPLICATI
     const giaPresente = mioMenuGlobale.some(p => p.strMeal.toLowerCase() === piattoScelto.strMeal.toLowerCase());
     if (giaPresente) {
         alert("Attenzione: Questo piatto è già presente nel tuo menu!");
-        return; // Blocca l'esecuzione
+        return; 
     }
 
     const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
@@ -447,7 +441,6 @@ async function eliminaPiattoDalMenu(idMeal) {
         if (!response.ok) throw new Error('Errore durante eliminazione');
 
         if (response.ok) {
-            // Chiude il modal prima di ricaricare il menu
             const modalEl = document.getElementById('modalGestisciPiatto');
             const modal = bootstrap.Modal.getInstance(modalEl);
             if(modal) modal.hide();

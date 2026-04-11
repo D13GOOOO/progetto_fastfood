@@ -5,6 +5,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const path = require('path');
 
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,7 +21,7 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'Documentazione RESTful API per il progetto Fast Food Express',
         },
-        servers: [{ url: `http://localhost:${PORT}` }],
+        servers: [{ url: 'http://localhost:3000' }], 
     },
     apis: [path.join(__dirname, 'routes/*.js')],
 };
@@ -27,13 +29,14 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fastfood';
+const mongoURI = process.env.MONGO_URI;
+
 mongoose
     .connect(mongoURI)
-    .then(() => console.log('Connesso con successo a MongoDB'))
+    .then(() => console.log('Connesso con successo a MongoDB Atlas!'))
     .catch((errore) => console.error('Errore critico di connessione a MongoDB:', errore));
 
-app.use('/api/users', require('./routes/users'));
+app.use('/api/users', require('./routes/users')); 
 app.use('/api/restaurants', require('./routes/restaurants'));
 app.use('/api/meals', require('./routes/meals'));
 app.use('/api/orders', require('./routes/orders'));

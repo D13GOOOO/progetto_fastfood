@@ -18,19 +18,33 @@ body {
     min-height: 100vh;
 }
 
-.navbar-fastfood {
-    background-color: var(--dark-bg) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+/* --- Stili Header & Navbar --- */
+.top-nav-links .nav-link {
+    transition: color 0.2s ease;
+    opacity: 0.8;
 }
 
-.navbar-fastfood .navbar-brand,
-.navbar-fastfood .nav-link {
-    color: #F9FAFB !important;
-    font-weight: 600;
-}
-
-.navbar-fastfood .nav-link:hover {
+.top-nav-links .nav-link:hover {
     color: var(--accent-color) !important;
+    opacity: 1;
+}
+
+.social-links a {
+    transition: all 0.2s;
+}
+
+.social-links a:hover {
+    color: var(--accent-color) !important;
+    transform: translateY(-2px);
+}
+
+.header-actions .bi {
+    transition: color 0.2s;
+}
+
+.header-actions button:hover .bi,
+.header-actions a:hover .bi {
+    color: var(--accent-color);
 }
 
 .footer-fastfood {
@@ -39,6 +53,7 @@ body {
     margin-top: auto;
 }
 
+/* --- Bottoni --- */
 .btn-primary {
     background-color: var(--accent-color);
     color: #FFFFFF;
@@ -61,6 +76,7 @@ body {
     border: none;
 }
 
+/* --- Cards --- */
 .card {
     border: none;
     border-radius: var(--radius);
@@ -81,6 +97,7 @@ body {
     border-top-right-radius: var(--radius);
 }
 
+/* --- Autenticazione & Utilità --- */
 .auth-card {
     border-radius: var(--radius);
     background-color: var(--card-bg);
@@ -116,4 +133,21 @@ body {
     color: var(--accent-color);
     border-bottom: 3px solid var(--accent-color);
     background: none;
+}
+
+.custom-dropdown-item {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.custom-dropdown-item:hover {
+    background-color: #f3f4f6;
+    transform: translateX(4px);
+}
+
+.btn-logout-custom:hover {
+    background-color: #fee2e2 !important;
+    color: #dc2626 !important;
 }
