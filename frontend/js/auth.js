@@ -1,3 +1,38 @@
+/* global API_URL, mostraNotifica */
+
+function mostraNotificaAuth(messaggio, tipo = 'error') {
+    let container = document.getElementById('toast-container-custom');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container-custom';
+        container.className = 'toast-container-custom';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    
+    const classeColore = tipo === 'success' ? 'toast-success' : 'toast-error';
+    const classeIcona = tipo === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+
+    // Rimuoviamo escapeHTML se non è presente in questo file, 
+    // oppure usiamo il testo grezzo (sicuro per stringhe scritte da noi)
+    toast.className = `toast-custom ${classeColore}`;
+    toast.innerHTML = `
+        <i class="bi ${classeIcona}"></i>
+        <p class="testo">${messaggio}</p>
+        <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => {
+            toast.remove();
+        }, 500);
+    }, 6000);
+}
+
 const API_URL = 'http://localhost:3000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,20 +56,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await response.json();
                     localStorage.setItem('utenteLoggato', JSON.stringify(data));
 
-                    alert('Bentornato! Accesso effettuato con successo');
+                    // NUOVO POPUP DI SUCCESSO!
+                    mostraNotificaAuth('Bentornato! Accesso effettuato con successo', 'success');
 
-                    if (data.utente.ruolo === 'ristoratore') {
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                    // Ritardo di 1.5 secondi per far vedere l'animazione prima del redirect
+                    setTimeout(() => {
+                        if (data.utente.ruolo === 'ristoratore') {
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 1500);
+                    
                 } else {
                     const errore = await response.json();
-                    alert('Errore: ' + (errore.message || 'Credenziali non valide'));
+                    // NUOVO POPUP DI ERRORE!
+                    mostraNotificaAuth('Errore: ' + (errore.message || 'Credenziali non valide'), 'error');
                 }
             } catch (error) {
                 console.error("Errore di connessione:", error);
-                alert("Impossibile connettersi al server.");
+                mostraNotificaAuth("Impossibile connettersi al server.", "error");
             }
         });
     }
@@ -60,15 +101,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    alert('Account creato con successo! Ora puoi effettuare il login.');
-                    window.location.href = 'login.html';
+                    // NUOVO POPUP DI SUCCESSO!
+                    mostraNotificaAuth('Account creato con successo! Ora puoi effettuare il login.', 'success');
+                    
+                    // Ritardo di 2 secondi per far leggere il messaggio prima del redirect
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    
                 } else {
                     const errore = await response.json();
-                    alert('Errore: ' + (errore.message || 'Registrazione fallita'));
+                    // NUOVO POPUP DI ERRORE!
+                    mostraNotificaAuth('Errore: ' + (errore.message || 'Registrazione fallita'), 'error');
                 }
             } catch (error) {
                 console.error("Errore:", error);
-                alert("Impossibile connettersi al server.");
+                mostraNotificaAuth("Impossibile connettersi al server.", "error");
             }
         });
     }

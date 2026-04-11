@@ -129,7 +129,7 @@ async function caricaOrdini() {
         if (!tbody) return;
 
         if (ordini.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nessun ordine presente al momento.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">Nessun ordine presente al momento.</td></tr>';
             return;
         }
 
@@ -139,29 +139,35 @@ async function caricaOrdini() {
             const dataFormattata = new Date(ordine.dataOrdine).toLocaleString('it-IT', {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'
             });
-            const piattiList = ordine.piatti.map(p => `${escapeHTML(p.quantita)}x ${escapeHTML(p.nomePiatto)}`).join('<br>');
+            const piattiList = ordine.piatti.map(p => `<strong class="text-dark">${escapeHTML(p.quantita)}x</strong> ${escapeHTML(p.nomePiatto)}`).join('<br>');
             const nomeCliente = ordine.utente ? `${escapeHTML(ordine.utente.nome)} ${escapeHTML(ordine.utente.cognome)}` : 'Cliente Sconosciuto';
+
+            // Badge colori per la dashboard
+            let badgeStatoColore = 'bg-secondary';
+            if (ordine.stato === 'In attesa') badgeStatoColore = 'bg-warning text-dark';
+            if (ordine.stato === 'In preparazione') badgeStatoColore = 'bg-primary';
 
             let selectStato;
             if (ordine.stato !== 'Consegnato') {
                 const stati = ['In attesa', 'In preparazione', 'Consegnato'];
                 selectStato = `
-                    <select class="form-select form-select-sm w-auto select-stato-ordine" data-id="${escapeHTML(String(ordine._id))}">
+                    <select class="form-select form-select-sm w-auto select-stato-ordine bg-light border-0 fw-bold text-secondary rounded-pill px-3 shadow-none" data-id="${escapeHTML(String(ordine._id))}">
                         ${stati.map(s => `<option value="${escapeHTML(s)}" ${ordine.stato === s ? 'selected' : ''}>${escapeHTML(s)}</option>`).join('')}
                     </select>
                 `;
             } else {
-                selectStato = `<span class="badge bg-success">Completato</span>`;
+                selectStato = `<span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> Completato</span>`;
+                badgeStatoColore = 'bg-success';
             }
 
             return `
                 <tr>
-                    <td class="small text-muted">${escapeHTML(dataFormattata)}</td>
-                    <td class="fw-bold">${nomeCliente}</td>
-                    <td class="small">${piattiList}</td>
-                    <td class="fw-bold text-success">${escapeHTML(ordine.prezzoTotale.toFixed(2))} €</td>
-                    <td><span class="badge bg-secondary">${escapeHTML(ordine.stato)}</span></td>
-                    <td>${selectStato}</td>
+                    <td class="small text-muted py-3 ps-4">${escapeHTML(dataFormattata)}</td>
+                    <td class="fw-bold py-3 text-dark">${nomeCliente}</td>
+                    <td class="small py-3 text-muted">${piattiList}</td>
+                    <td class="fw-bold text-success py-3 fs-5">${escapeHTML(ordine.prezzoTotale.toFixed(2))} €</td>
+                    <td class="py-3"><span class="badge ${badgeStatoColore} rounded-pill px-3 py-2">${escapeHTML(ordine.stato)}</span></td>
+                    <td class="py-3 pe-4 text-end">${selectStato}</td>
                 </tr>
             `;
         }).join('');
@@ -170,7 +176,7 @@ async function caricaOrdini() {
         console.error("Errore recupero ordini:", error);
         const tbody = document.getElementById('tabella-ordini');
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Errore di connessione.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-5">Errore di connessione.</td></tr>';
         }
     }
 }
@@ -252,7 +258,7 @@ async function salvaPiatto(evento) {
         prezzo: parseFloat(document.getElementById('piatto-prezzo').value),
         strCategory: document.getElementById('piatto-categoria').value || "Generico",
         ingredients: arrayIngredienti,
-        strMealThumb: document.getElementById('piatto-immagine').value || "https://via.placeholder.com/150",
+        strMealThumb: document.getElementById('piatto-immagine').value || "https://placehold.co/400x300?text=Nessuna+Foto",
         strArea: "Personalizzato",
         strInstructions: "Piatto creato dal ristoratore.",
         measures: [],
@@ -300,18 +306,23 @@ async function caricaCatalogo() {
             return;
         }
 
+        // Stile allineato ad app.js (Card moderne, bordo 16px, pulsanti a pillola)
         contenitore.innerHTML = catalogoDiSistema.map(piatto => {
             return `
                 <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 160px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="card-body d-flex flex-column p-3">
-                            <h6 class="fw-bold mb-2">${escapeHTML(piatto.strMeal)}</h6>
-                            <div><span class="badge bg-secondary mb-3">${escapeHTML(piatto.strCategory)}</span></div>
-                            <div class="mt-auto">
-                                <p class="text-success fw-bold mb-3">${piatto.prezzo ? escapeHTML(piatto.prezzo.toFixed(2)) : "0.00"} €</p>
-                                <button class="btn btn-sm btn-success w-100 fw-bold btn-copia-piatto" data-id="${escapeHTML(String(piatto.idMeal))}">
-                                    + Aggiungi al mio Menu
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+                        <div class="position-relative">
+                            <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 220px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=Nessuna+Foto'">
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title fw-bold m-0 lh-sm text-dark mb-3">${escapeHTML(piatto.strMeal)}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-danger rounded-pill">#${escapeHTML(piatto.strCategory.toLowerCase() || 'generico')}</span>
+                            </div>
+                            <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                                <h4 class="fw-bold text-success m-0">${piatto.prezzo ? escapeHTML(piatto.prezzo.toFixed(2)) : "0.00"} €</h4>
+                                <button class="btn btn-success fw-bold rounded-pill shadow-sm px-3 py-2 btn-copia-piatto" data-id="${escapeHTML(String(piatto.idMeal))}">
+                                    <i class="bi bi-plus-lg"></i> Aggiungi
                                 </button>
                             </div>
                         </div>
@@ -382,40 +393,46 @@ async function caricaMioMenu() {
         if (!contenitore) return;
 
         if (mioMenuGlobale.length === 0) {
-            contenitore.innerHTML = '<p class="text-muted text-center w-100 py-4">Non hai ancora aggiunto piatti al tuo menu. Vai in "Catalogo Base" o "Nuovo Piatto".</p>';
+            contenitore.innerHTML = '<p class="text-muted text-center w-100 py-5">Non hai ancora aggiunto piatti al tuo menu. Vai in "Catalogo Base" o "Nuovo Piatto".</p>';
             return;
         }
 
+        // Stile allineato ad app.js
         contenitore.innerHTML = mioMenuGlobale.map(piatto => {
-            let infoPrezzo = `<p class="text-success fw-bold mb-3">${piatto.prezzo ? piatto.prezzo.toFixed(2) : "0.00"} €</p>`;
+            let bloccoPrezzo = `<h4 class="fw-bold text-success m-0">${piatto.prezzo ? piatto.prezzo.toFixed(2) : "0.00"} €</h4>`;
+            let badgeSconto = '';
 
             if (piatto.scontoPercentuale > 0 && piatto.scontoScadenza) {
                 const dataScadenza = new Date(piatto.scontoScadenza);
                 if (dataScadenza > new Date()) {
                     const prezzoScontato = piatto.prezzo - (piatto.prezzo * (piatto.scontoPercentuale / 100));
-                    infoPrezzo = `
-                        <div class="mb-3">
-                            <span class="text-muted text-decoration-line-through small d-block">${piatto.prezzo.toFixed(2)} €</span>
-                            <span class="text-danger fw-bold">${prezzoScontato.toFixed(2)} €</span>
-                            <span class="badge bg-warning text-dark ms-1">-${piatto.scontoPercentuale}%</span>
-                            <div class="text-muted mt-1" style="font-size: 0.75rem;">Scade: ${dataScadenza.toLocaleDateString('it-IT')} ${dataScadenza.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'})}</div>
+                    bloccoPrezzo = `
+                        <div class="d-flex flex-column">
+                            <span class="text-muted text-decoration-line-through lh-1" style="font-size: 0.8rem;">${piatto.prezzo.toFixed(2)} €</span>
+                            <h4 class="fw-bold text-danger m-0 lh-1 mt-1">${prezzoScontato.toFixed(2)} €</h4>
+                            <div class="text-muted mt-1" style="font-size: 0.65rem;">Scade: ${dataScadenza.toLocaleDateString('it-IT')}</div>
                         </div>
                     `;
+                    badgeSconto = `<span class="position-absolute top-0 start-0 badge bg-warning text-dark m-3 shadow-sm fs-6 rounded-pill">-${piatto.scontoPercentuale}%</span>`;
                 }
             }
 
             return `
                 <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 160px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="card-body d-flex flex-column p-3">
-                            <h6 class="fw-bold mb-2 text-truncate" title="${escapeHTML(piatto.strMeal)}">${escapeHTML(piatto.strMeal)}</h6>
-                            <div><span class="badge bg-secondary mb-3">${escapeHTML(piatto.strCategory)}</span></div>
-                            <div class="mt-auto">
-                                ${infoPrezzo}
-                                <button class="btn btn-sm btn-outline-primary w-100 fw-bold btn-gestisci-piatto" data-id="${escapeHTML(String(piatto.idMeal))}
-                                <button class="btn btn-sm btn-outline-primary w-100 fw-bold" onclick="apriModalGestisciPiatto('${String(piatto.idMeal)}')">
-                                    Gestisci
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+                        <div class="position-relative">
+                            ${badgeSconto}
+                            <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" alt="${escapeHTML(piatto.strMeal)}" style="height: 220px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=Nessuna+Foto'">
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title fw-bold m-0 lh-sm text-dark mb-3 text-truncate" title="${escapeHTML(piatto.strMeal)}">${escapeHTML(piatto.strMeal)}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-danger rounded-pill">#${escapeHTML(piatto.strCategory.toLowerCase() || 'generico')}</span>
+                            </div>
+                            <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                                ${bloccoPrezzo}
+                                <button class="btn btn-outline-primary fw-bold rounded-pill shadow-sm px-3 py-2 btn-gestisci-piatto" data-id="${escapeHTML(String(piatto.idMeal))}">
+                                    <i class="bi bi-pencil-square"></i> Modifica
                                 </button>
                             </div>
                         </div>

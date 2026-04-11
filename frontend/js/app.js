@@ -59,34 +59,64 @@ function controllaLogin() {
 
     if (utenteSalvato && areaUtente) {
         const dati = JSON.parse(utenteSalvato);
+        const iniziale = escapeHTML(dati.utente.nome).charAt(0).toUpperCase();
 
-        let linkAreaPrivata = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="ordini.html"><i class="bi bi-box-seam me-2 text-muted"></i>I miei ordini</a></li>`;
-        if (dati.utente.ruolo === 'ristoratore') {
-            linkAreaPrivata = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="dashboard.html"><i class="bi bi-graph-up me-2 text-muted"></i>Area Ristoratore</a></li>`;
+        areaUtente.innerHTML = `
+            <a class="text-white text-decoration-none fw-medium d-flex align-items-center gap-2" href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUtente" aria-controls="offcanvasUtente">
+                <div class="bg-white text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 35px; height: 35px; font-size: 1rem;">
+                    ${iniziale}
+                </div>
+                <span class="d-none d-sm-inline">Ciao, ${escapeHTML(dati.utente.nome)}</span>
+            </a>
+        `;
+
+        let offcanvasElement = document.getElementById('offcanvasUtente');
+        if (!offcanvasElement) {
+            offcanvasElement = document.createElement('div');
+            offcanvasElement.id = 'offcanvasUtente';
+            offcanvasElement.className = 'offcanvas offcanvas-end shadow-lg border-0';
+            offcanvasElement.setAttribute('tabindex', '-1');
+            offcanvasElement.style.zIndex = '10500';
+            
+            document.body.appendChild(offcanvasElement);
         }
 
-        const linkProfilo = `<li><a class="dropdown-item py-2 custom-dropdown-item" href="profilo.html"><i class="bi bi-person me-2 text-muted"></i>Il mio Profilo</a></li>`;
+        let linkAreaPrivata = `<a href="ordini.html" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center gap-3"><i class="bi bi-box-seam fs-5 text-muted"></i> <span class="fw-medium">I miei ordini</span></a>`;
+        if (dati.utente.ruolo === 'ristoratore') {
+            linkAreaPrivata = `<a href="dashboard.html" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center gap-3"><i class="bi bi-graph-up fs-5 text-muted"></i> <span class="fw-medium">Area Ristoratore</span></a>`;
+        }
+        const linkProfilo = `<a href="profilo.html" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center gap-3"><i class="bi bi-person fs-5 text-muted"></i> <span class="fw-medium">Il mio Profilo</span></a>`;
 
-        // FIX ALLINEAMENTO: Sostituito il toggle standard con un flexbox personalizzato e aggiunto offset al menu
-        areaUtente.innerHTML = `
-            <div class="dropdown">
-                <a class="text-white text-decoration-none fw-medium d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span>Ciao, ${escapeHTML(dati.utente.nome)}</span>
-                    <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem; padding-top: 2px;"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="border-radius: 16px; min-width: 220px; margin-top: 14px !important;">
-                    <li class="px-3 py-2 mb-2 bg-light rounded-3 d-flex flex-column">
-                        <small class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Loggato come</small>
-                        <strong class="text-dark">${escapeHTML(dati.utente.nome)}</strong>
-                    </li>
+        const ruoloTesto = dati.utente.ruolo === 'ristoratore' ? 'Ristoratore' : 'Cliente';
+
+        offcanvasElement.innerHTML = `
+            <div class="offcanvas-header border-bottom py-3">
+                <h6 class="offcanvas-title fw-bold text-uppercase tracking-wide text-muted" style="letter-spacing: 1px; font-size: 0.8rem;">Il tuo Account</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            
+            <div class="offcanvas-body d-flex flex-column p-0">
+                <div class="p-4 bg-light text-center border-bottom d-flex flex-column align-items-center">
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                        ${iniziale}
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">${escapeHTML(dati.utente.nome)}</h4>
+                    <span class="badge bg-secondary rounded-pill px-3 py-2 fw-normal">${ruoloTesto}</span>
+                </div>
+
+                <div class="list-group list-group-flush mt-2">
                     ${linkProfilo}
                     ${linkAreaPrivata}
-                    <li><hr class="dropdown-divider my-2"></li>
-                    <li><button class="dropdown-item py-2 text-danger fw-bold custom-dropdown-item btn-logout-custom" id="btn-logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
-                </ul>
+                </div>
+
+                <div class="mt-auto p-4 border-top">
+                    <button id="btn-logout" class="btn btn-outline-danger w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-4" style="transition: all 0.2s;">
+                        <i class="bi bi-box-arrow-right fs-5"></i> Disconnettiti
+                    </button>
+                </div>
             </div>
         `;
-        
+
         document.getElementById('btn-logout').addEventListener('click', esci);
     }
 }
@@ -286,7 +316,8 @@ function aggiungiAlCarrello(id, event) {
     if (piattoScelto) {
         if (carrello.length > 0) {
             if (String(carrello[0].creatore) !== String(piattoScelto.creatore)) {
-                alert("Puoi ordinare da un solo ristorante per volta! Svuota il carrello o concludi l'ordine attuale prima di cambiare locale.");
+                // Sostituito con mostraNotifica!
+                mostraNotifica("Non puoi ordinare da due ristoranti diversi! Concludi o svuota l'ordine attuale.", "error");
                 return;
             }
         }
@@ -317,7 +348,6 @@ function aggiornaInterfacciaCarrello() {
     if (!lista || !totaleTesto) return;
 
     if (carrello.length === 0) {
-        // Design carrello vuoto moderno
         lista.innerHTML = `
             <div class="text-center text-muted my-5 d-flex flex-column align-items-center">
                 <i class="bi bi-bag-x fs-1 mb-3 opacity-25"></i>
@@ -329,7 +359,6 @@ function aggiornaInterfacciaCarrello() {
 
     let totale = 0;
     
-    // FIX DESIGN CARRELLO PIENO: Layout moderno con foto miniatura, bordi arrotondati, cestino icona
     lista.innerHTML = carrello.map((item, index) => {
         const prezzoScontato = calcolaPrezzoReale(item);
         totale += prezzoScontato;
@@ -408,14 +437,18 @@ function animazioneLancioCarrello(idPiatto, bottoneCliccato) {
 
 async function inviaOrdine() {
     if (carrello.length === 0) {
-        alert("Il carrello è vuoto!");
+        // Sostituito con mostraNotifica!
+        mostraNotifica("Il carrello è vuoto!", "error");
         return;
     }
 
     const utenteSalvato = localStorage.getItem('utenteLoggato');
     if (!utenteSalvato) {
-        alert("Effettua l'accesso per ordinare.");
-        window.location.href = 'login.html';
+        // Sostituito con mostraNotifica e ritardo!
+        mostraNotifica("Effettua l'accesso per ordinare.", "error");
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000); // 2 secondi di ritardo per far leggere l'errore!
         return;
     }
 
@@ -446,7 +479,8 @@ async function inviaOrdine() {
         });
 
         if (response.ok) {
-            alert("Ordine completato con successo!");
+            // Sostituito con mostraNotifica!
+            mostraNotifica("Ordine completato con successo!", "success");
             carrello = [];
             aggiornaInterfacciaCarrello();
 
@@ -457,11 +491,12 @@ async function inviaOrdine() {
             }
         } else {
             const errore = await response.json();
-            alert("Errore: " + (errore.message || "Riprova più tardi."));
+            // Sostituito con mostraNotifica!
+            mostraNotifica("Errore: " + (errore.message || "Riprova più tardi."), "error");
         }
     } catch (error) {
         console.error("Errore:", error);
-        alert("Errore di connessione.");
+        mostraNotifica("Errore di connessione.", "error");
     }
 }
 
@@ -522,7 +557,7 @@ async function caricaOrdiniUtente() {
 
             return `
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="fw-bold m-0 text-primary">Ordine del ${escapeHTML(dataFormattata)}</h6>
@@ -533,7 +568,7 @@ async function caricaOrdiniUtente() {
                         </ul>
                         ${extraUi}
                     </div>
-                    <div class="card-footer bg-light border-top-0 d-flex justify-content-between align-items-center">
+                    <div class="card-footer bg-light border-top-0 d-flex justify-content-between align-items-center" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
                         <span class="text-muted small" style="font-size: 0.7rem;">ID: ${escapeHTML(String(ordine._id).substring(0, 8))}...</span>
                         <h5 class="fw-bold text-success m-0">${ordine.prezzoTotale.toFixed(2)} €</h5>
                     </div>
@@ -549,3 +584,36 @@ async function caricaOrdiniUtente() {
         }
     }
 }
+
+// IL NUOVO MOTORE DI NOTIFICHE TOAST DINAMICO
+function mostraNotifica(messaggio, tipo = 'error') {
+    let container = document.getElementById('toast-container-custom');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container-custom';
+        container.className = 'toast-container-custom';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    
+    const classeColore = tipo === 'success' ? 'toast-success' : 'toast-error';
+    const classeIcona = tipo === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+
+    toast.className = `toast-custom ${classeColore}`;
+    toast.innerHTML = `
+        <i class="bi ${classeIcona}"></i>
+        <p class="testo">${escapeHTML(messaggio)}</p>
+        <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => {
+            toast.remove();
+        }, 500);
+    }, 6000);
+}
+

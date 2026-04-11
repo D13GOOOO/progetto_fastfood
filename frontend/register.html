@@ -5,74 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrati - Fast Food Express</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-fastfood">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html">FastFood Express</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="index.html">Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="login.html">Accedi</a></li>
-            </ul>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<header class="main-header bg-white sticky-top py-3 border-bottom shadow-sm" style="z-index: 1040;">
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="brand-center text-center">
+            <a href="index.html" class="text-decoration-none d-flex align-items-center gap-2" title="Torna alla Home">
+                <div class="logo-icon bg-danger text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 45px; height: 45px;">
+                    <i class="bi bi-shop fs-4"></i>
+                </div>
+                <div class="text-start">
+                    <h3 class="m-0 fw-bold text-dark" style="font-family: serif; letter-spacing: -0.5px;">FastFood</h3>
+                    <small class="text-muted fw-bold" style="letter-spacing: 2px; font-size: 0.65rem; text-transform: uppercase;">Express Delivery</small>
+                </div>
+            </a>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container mt-5">
+<div class="container mt-5 mb-auto">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card auth-card">
-                <h2 class="text-center mb-4 fw-bold">Nuovo Account</h2>
+        <div class="col-md-7 col-lg-6">
+            
+            <div class="card auth-card shadow-sm border-0 p-4 p-md-5 mb-5" style="border-radius: 16px;">
+                
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-plus-fill fs-2 text-secondary"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark m-0">Nuovo Account</h3>
+                    <p class="text-muted small mt-1">Unisciti a noi e inizia ad ordinare</p>
+                </div>
+
                 <form id="register-form">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label for="reg-nome" class="form-label text-muted">Nome</label>
-                            <input type="text" class="form-control" id="reg-nome" required>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="reg-nome" class="form-label text-muted small fw-bold mb-1">Nome</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-tag"></i></span>
+                                <input type="text" class="form-control bg-light border-0 py-2 shadow-none" id="reg-nome" placeholder="Mario" required>
+                            </div>
                         </div>
-                        <div class="col">
-                            <label for="reg-cognome" class="form-label text-muted">Cognome</label>
-                            <input type="text" class="form-control" id="reg-cognome" required>
+                        <div class="col-sm-6">
+                            <label for="reg-cognome" class="form-label text-muted small fw-bold mb-1">Cognome</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-tags"></i></span>
+                                <input type="text" class="form-control bg-light border-0 py-2 shadow-none" id="reg-cognome" placeholder="Rossi" required>
+                            </div>
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="reg-email" class="form-label text-muted">Email</label>
-                        <input type="email" class="form-control" id="reg-email" required>
+                        <label for="reg-email" class="form-label text-muted small fw-bold mb-1">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control bg-light border-0 py-2 shadow-none" id="reg-email" placeholder="es. mario@email.com" required>
+                        </div>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="reg-password" class="form-label text-muted">Password</label>
-                        <input type="password" class="form-control" id="reg-password" required>
+                        <label for="reg-password" class="form-label text-muted small fw-bold mb-1">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control bg-light border-0 py-2 shadow-none" id="reg-password" placeholder="Scegli una password sicura" required>
+                        </div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="reg-ruolo" class="form-label text-muted">Tipologia Utente</label>
-                        <select class="form-select" id="reg-ruolo" required>
-                            <option value="cliente" selected>Cliente</option>
-                            <option value="ristoratore">Ristoratore</option>
-                        </select>
+                        <label for="reg-ruolo" class="form-label text-muted small fw-bold mb-1">Tipologia Utente</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-person-badge"></i></span>
+                            <select class="form-select bg-light border-0 py-2 shadow-none" id="reg-ruolo" required>
+                                <option value="cliente" selected>Sono un Cliente</option>
+                                <option value="ristoratore">Sono un Ristoratore</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-4">
-                        <label for="reg-preferenze" class="form-label text-muted">Preferenze / Offerte Speciali (Opzionale)</label>
-                        <input type="text" class="form-control" id="reg-preferenze" placeholder="Es. Vegano, Carne, Offerte sui Burger...">
-                        <div class="form-text" style="font-size: 0.8rem;">Dicci cosa ti piace, ti proporremo i piatti migliori!</div>
+                        <label for="reg-preferenze" class="form-label text-muted small fw-bold mb-1">Preferenze (Opzionale)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-star"></i></span>
+                            <input type="text" class="form-control bg-light border-0 py-2 shadow-none" id="reg-preferenze" placeholder="Es. Vegano, Carne, Offerte sui Burger...">
+                        </div>
+                        <div class="form-text text-muted mt-2" style="font-size: 0.75rem;"><i class="bi bi-info-circle me-1"></i>Dicci cosa ti piace, ti proporremo i piatti migliori!</div>
                     </div>
 
-                    <button type="submit" class="btn btn-danger w-100 fw-bold py-2">Crea Account</button>
+                    <button type="submit" class="btn btn-danger w-100 fw-bold py-3 rounded-pill shadow-sm" style="transition: all 0.2s;">Crea Account</button>
                 </form>
-                <hr class="my-4">
+                
+                <hr class="my-4 opacity-25">
+                
                 <div class="text-center">
-                    <p class="text-muted mb-1">Hai già un account?</p>
-                    <a href="login.html" class="btn btn-outline-primary w-100 fw-bold">Vai al Login</a>
+                    <p class="text-muted mb-2 small">Hai già un account?</p>
+                    <a href="login.html" class="btn btn-outline-secondary w-100 fw-bold py-2 rounded-pill" style="transition: all 0.2s;">Vai al Login</a>
                 </div>
+                
             </div>
+            
         </div>
     </div>
 </div>
+
+<footer class="footer-fastfood mt-auto py-4" style="background-color: var(--dark-bg, #1a1e21);">
+    <div class="container">
+        <p class="m-0 text-center text-white opacity-75 small">Copyright &copy; FastFood Express 2026</p>
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/auth.js"></script>

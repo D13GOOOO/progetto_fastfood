@@ -151,3 +151,79 @@ body {
     background-color: #fee2e2 !important;
     color: #dc2626 !important;
 }
+
+/* --- Messaggio di errore custom --- */
+.toast-container-custom {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10650;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast-custom {
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    overflow: hidden;
+    min-width: 320px;
+    max-width: 450px;
+    animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.toast-error {
+    background-color: #dc3545;
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
+}
+
+.toast-success {
+    background-color: #198754;
+    box-shadow: 0 10px 25px rgba(25, 135, 84, 0.4);
+}
+
+.toast-custom.fade-out {
+    animation: fadeOutToast 0.5s ease-in forwards;
+}
+
+.toast-custom i {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.toast-custom .testo {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 100%;
+    animation: shrinkProgress 6s linear forwards;
+}
+
+@keyframes slideInToast {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOutToast {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+@keyframes shrinkProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
