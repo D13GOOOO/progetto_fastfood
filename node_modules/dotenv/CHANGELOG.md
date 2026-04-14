@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [Unreleased](https://github.com/motdotla/dotenv/compare/v17.4.1...master)
+## [Unreleased](https://github.com/motdotla/dotenv/compare/v17.4.2...master)
+
+## [17.4.2](https://github.com/motdotla/dotenv/compare/v17.4.1...v17.4.2) (2026-04-12)
+
+### Changed
+
+* Improved skill files - tightened up details ([#1009](https://github.com/motdotla/dotenv/pull/1009))
 
 ## [17.4.1](https://github.com/motdotla/dotenv/compare/v17.4.0...v17.4.1) (2026-04-05)
 

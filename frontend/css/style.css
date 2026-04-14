@@ -1,3 +1,6 @@
+/* =========================================
+   VARIABILI GLOBALI E RESET
+   ========================================= */
 :root {
     --app-bg: #F3F4F6;
     --card-bg: #FFFFFF;
@@ -18,7 +21,9 @@ body {
     min-height: 100vh;
 }
 
-/* --- Stili Header & Navbar --- */
+/* =========================================
+   HEADER, NAVBAR E FOOTER
+   ========================================= */
 .top-nav-links .nav-link {
     transition: color 0.2s ease;
     opacity: 0.8;
@@ -53,7 +58,9 @@ body {
     margin-top: auto;
 }
 
-/* --- Bottoni --- */
+/* =========================================
+   BOTTONI
+   ========================================= */
 .btn-primary {
     background-color: var(--accent-color);
     color: #FFFFFF;
@@ -76,7 +83,9 @@ body {
     border: none;
 }
 
-/* --- Cards --- */
+/* =========================================
+   CARDS (Piatti, Ordini, ecc.)
+   ========================================= */
 .card {
     border: none;
     border-radius: var(--radius);
@@ -97,7 +106,9 @@ body {
     border-top-right-radius: var(--radius);
 }
 
-/* --- Autenticazione & Utilità --- */
+/* =========================================
+   UTILITY E CLASSI SPECIFICHE
+   ========================================= */
 .auth-card {
     border-radius: var(--radius);
     background-color: var(--card-bg);
@@ -152,7 +163,9 @@ body {
     color: #dc2626 !important;
 }
 
-/* --- Messaggio di errore custom --- */
+/* =========================================
+   NOTIFICHE TOAST (Successo/Errore)
+   ========================================= */
 .toast-container-custom {
     position: fixed;
     top: 20px;
@@ -227,3 +240,175 @@ body {
     to { width: 0%; }
 }
 
+/* =========================================
+   CUSTOM CONFIRM DIALOG (MODALE DI CONFERMA)
+   ========================================= */
+
+/* Sfondo scuro e sfocato (Overlay) */
+.custom-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px); /* Effetto vetro/sfocatura */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Mostra l'overlay */
+.custom-confirm-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Il Box Bianco del Modale */
+.custom-confirm-box {
+    background: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 24px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+/* Animazione di entrata del Box (Effetto rimbalzo morbido) */
+.custom-confirm-box.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* L'icona circolare in alto (Il triangolo di attenzione) */
+.custom-confirm-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #fff3cd;
+    color: #ffc107;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    margin: 0 auto 20px auto;
+}
+
+/* Stili specifici per i pulsanti del modale */
+.custom-confirm-box .btn {
+    padding: 12px 20px;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.custom-confirm-box .btn-annulla:hover {
+    background-color: #e9ecef;
+}
+
+.custom-confirm-box .btn-conferma {
+    background-color: #dc3545;
+    color: white;
+}
+
+.custom-confirm-box .btn-conferma:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+/* =========================================
+   SKELETON SCREENS (Effetto Caricamento)
+   ========================================= */
+.skeleton-card {
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--card-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Elemento base grigio che pulsa */
+.skeleton-element {
+    position: relative;
+    overflow: hidden;
+    background-color: #e2e5e7; /* Grigio chiaro scheletro */
+}
+
+/* L'onda di luce che scorre (Shimmer) */
+.skeleton-element::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.4) 20%,
+        rgba(255, 255, 255, 0.6) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+/* Rende gli input in stato skeleton animati */
+input.skeleton-element, select.skeleton-element, textarea.skeleton-element {
+    color: transparent !important;
+    pointer-events: none;
+    border-color: #e2e5e7 !important;
+}
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+/* Forme specifiche per simulare i piatti */
+.skeleton-img { height: 220px; width: 100%; }
+.skeleton-text { height: 16px; border-radius: 4px; margin-bottom: 10px; }
+.skeleton-title { height: 24px; width: 70%; border-radius: 6px; margin-bottom: 15px; }
+.skeleton-badge { height: 24px; width: 60px; border-radius: 50px; }
+.skeleton-btn { height: 40px; width: 100px; border-radius: 50px; }
+
+/* =========================================
+   VALIDAZIONE FORM LIVE (Feedback visivo)
+   ========================================= */
+
+/* Campo Valido (Verde con spunta) */
+.form-control.is-valid {
+    border-color: var(--price-green) !important;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310B981' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    transition: border-color 0.3s ease;
+}
+
+.form-control.is-valid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Campo Invalido (Arancione con X) */
+.form-control.is-invalid {
+    border-color: var(--accent-color) !important;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23FF6B35'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4v3H5.8z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23FF6B35' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    transition: border-color 0.3s ease;
+}
+
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25) !important;
+}

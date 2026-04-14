@@ -1,6 +1,6 @@
 /* global bootstrap */
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 let menuOriginale = [];
 let carrello = JSON.parse(localStorage.getItem('carrelloFastFood')) || [];
@@ -8,8 +8,20 @@ let ristorantiGlobali = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     aggiornaInterfacciaCarrello();
-    caricaMenu().catch(console.error);
     controllaLogin();
+
+    // Carica il menu SOLO se ci troviamo nella pagina che ha il contenitore del menu (Home)
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        caricaMenu().catch(console.error);
+        
+        menuContainer.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('btn-aggiungi-carrello')) {
+                const id = e.target.getAttribute('data-id');
+                aggiungiAlCarrello(id, e);
+            }
+        });
+    }
 
     const formRicerca = document.getElementById('form-ricerca');
     if (formRicerca) {
@@ -19,16 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPaga = document.getElementById('btn-paga');
     if (btnPaga) {
         btnPaga.addEventListener('click', inviaOrdine);
-    }
-    
-    const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
-        menuContainer.addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('btn-aggiungi-carrello')) {
-                const id = e.target.getAttribute('data-id');
-                aggiungiAlCarrello(id, e);
-            }
-        });
     }
 });
 
@@ -127,6 +129,9 @@ function esci() {
 }
 
 async function caricaMenu() {
+
+    mostraSkeletonMenu();
+    
     try {
         const [resPiatti, resRistoranti] = await Promise.all([
             fetch(`${API_URL}/meals`),
@@ -316,7 +321,6 @@ function aggiungiAlCarrello(id, event) {
     if (piattoScelto) {
         if (carrello.length > 0) {
             if (String(carrello[0].creatore) !== String(piattoScelto.creatore)) {
-                // Sostituito con mostraNotifica!
                 mostraNotifica("Non puoi ordinare da due ristoranti diversi! Concludi o svuota l'ordine attuale.", "error");
                 return;
             }
@@ -437,18 +441,16 @@ function animazioneLancioCarrello(idPiatto, bottoneCliccato) {
 
 async function inviaOrdine() {
     if (carrello.length === 0) {
-        // Sostituito con mostraNotifica!
         mostraNotifica("Il carrello è vuoto!", "error");
         return;
     }
 
     const utenteSalvato = localStorage.getItem('utenteLoggato');
     if (!utenteSalvato) {
-        // Sostituito con mostraNotifica e ritardo!
         mostraNotifica("Effettua l'accesso per ordinare.", "error");
         setTimeout(() => {
             window.location.href = 'login.html';
-        }, 2000); // 2 secondi di ritardo per far leggere l'errore!
+        }, 2000); 
         return;
     }
 
@@ -479,7 +481,6 @@ async function inviaOrdine() {
         });
 
         if (response.ok) {
-            // Sostituito con mostraNotifica!
             mostraNotifica("Ordine completato con successo!", "success");
             carrello = [];
             aggiornaInterfacciaCarrello();
@@ -491,7 +492,6 @@ async function inviaOrdine() {
             }
         } else {
             const errore = await response.json();
-            // Sostituito con mostraNotifica!
             mostraNotifica("Errore: " + (errore.message || "Riprova più tardi."), "error");
         }
     } catch (error) {
@@ -585,7 +585,6 @@ async function caricaOrdiniUtente() {
     }
 }
 
-// IL NUOVO MOTORE DI NOTIFICHE TOAST DINAMICO
 function mostraNotifica(messaggio, tipo = 'error') {
     let container = document.getElementById('toast-container-custom');
     if (!container) {
@@ -617,3 +616,74 @@ function mostraNotifica(messaggio, tipo = 'error') {
     }, 6000);
 }
 
+function mostraConferma(titolo, messaggio, testoConferma = "Sì, procedi") {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-confirm-overlay';
+        
+        const box = document.createElement('div');
+        box.className = 'custom-confirm-box';
+        
+        box.innerHTML = `
+            <div class="custom-confirm-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">${escapeHTML(titolo)}</h4>
+            <p class="text-muted small mb-4">${escapeHTML(messaggio)}</p>
+            <div class="d-flex gap-3 w-100">
+                <button class="btn btn-light fw-bold w-50 rounded-pill text-muted btn-annulla">Annulla</button>
+                <button class="btn btn-danger fw-bold w-50 rounded-pill btn-conferma">${escapeHTML(testoConferma)}</button>
+            </div>
+        `;
+        
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        
+        requestAnimationFrame(() => {
+            overlay.classList.add('show');
+            box.classList.add('show');
+        });
+
+        const chiudi = (esito) => {
+            overlay.classList.remove('show');
+            box.classList.remove('show');
+            setTimeout(() => {
+                overlay.remove();
+                resolve(esito); 
+            }, 300);
+        };
+
+        box.querySelector('.btn-annulla').addEventListener('click', () => chiudi(false));
+        box.querySelector('.btn-conferma').addEventListener('click', () => chiudi(true));
+    });
+}
+
+function mostraSkeletonMenu() {
+    const contenitore = document.getElementById('menu-container');
+    if (!contenitore) return;
+
+    const skeletonHtml = Array(6).fill(`
+        <div class="col-md-4 mb-4">
+            <div class="skeleton-card h-100">
+                <div class="skeleton-element skeleton-img"></div>
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="skeleton-element skeleton-title m-0"></div>
+                        <div class="skeleton-element" style="width: 24px; height: 24px; border-radius: 50%;"></div>
+                    </div>
+                    <div class="d-flex gap-2 mb-3">
+                        <div class="skeleton-element skeleton-badge"></div>
+                        <div class="skeleton-element skeleton-badge"></div>
+                    </div>
+                    <div class="skeleton-element skeleton-text w-50 mb-4"></div>
+                    <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="skeleton-element skeleton-title w-25 m-0"></div>
+                        <div class="skeleton-element skeleton-btn"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    contenitore.innerHTML = skeletonHtml;
+}

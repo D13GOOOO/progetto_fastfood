@@ -1,4 +1,4 @@
-/* global API_URL, escapeHTML, mostraNotifica */
+/* global escapeHTML, mostraNotifica, API_URL */
 
 let ristorantiOriginali = [];
 
@@ -11,7 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function mostraSkeletonRistoranti() {
+    const contenitore = document.getElementById('ristoranti-container');
+    if (!contenitore) return;
+
+    contenitore.innerHTML = Array(6).fill(`
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="skeleton-card h-100">
+                <div class="skeleton-element" style="height: 120px; width: 100%;"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="skeleton-element skeleton-title w-75 m-0"></div>
+                        <div class="skeleton-element" style="width: 60px; height: 20px; border-radius: 4px;"></div>
+                    </div>
+                    <div class="skeleton-element skeleton-text w-100 mt-2"></div>
+                    <div class="skeleton-element skeleton-text w-50 mb-4"></div>
+                    <div class="border-top pt-4 text-center">
+                        <div class="skeleton-element skeleton-text mx-auto mb-3" style="width: 40%;"></div>
+                        <div class="skeleton-element skeleton-btn w-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
 async function caricaRistoranti() {
+
+    mostraSkeletonRistoranti();
+
     try {
         const response = await fetch(`${API_URL}/restaurants`);
 
@@ -23,7 +51,6 @@ async function caricaRistoranti() {
     } catch (error) {
         console.error("Errore nel recupero ristoranti:", error);
         
-        // NUOVO POPUP DI ERRORE!
         if (typeof mostraNotifica === 'function') {
             mostraNotifica("Impossibile caricare i ristoranti. Riprova più tardi.", "error");
         }

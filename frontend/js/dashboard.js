@@ -1,6 +1,4 @@
-/* global bootstrap */
-
-const API_URL = 'http://localhost:3000/api';
+/* global bootstrap, mostraNotifica, mostraConferma, API_URL */
 
 function escapeHTML(str) {
     if (!str) return '';
@@ -79,8 +77,10 @@ function controllaAccessoRistoratore() {
 
     const dati = JSON.parse(utenteSalvato);
     if (dati.utente.ruolo !== 'ristoratore') {
-        alert('Accesso negato. Questa area è riservata ai ristoratori.');
-        window.location.href = 'index.html';
+        mostraNotifica('Accesso negato. Questa area è riservata ai ristoratori.', 'error');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
         return;
     }
 
@@ -95,7 +95,26 @@ function esci() {
     window.location.href = 'login.html';
 }
 
+// SKELETON: TABELLA ORDINI
+function mostraSkeletonOrdini() {
+    const tbody = document.getElementById('tabella-ordini');
+    if (tbody) {
+        tbody.innerHTML = Array(4).fill(`
+            <tr>
+                <td class="py-3 ps-4"><div class="skeleton-element skeleton-text w-75"></div></td>
+                <td class="py-3"><div class="skeleton-element skeleton-text w-100"></div></td>
+                <td class="py-3"><div class="skeleton-element skeleton-text w-100"></div></td>
+                <td class="py-3"><div class="skeleton-element skeleton-text w-50"></div></td>
+                <td class="py-3"><div class="skeleton-element skeleton-badge"></div></td>
+                <td class="py-3 pe-4 text-end"><div class="skeleton-element skeleton-btn mx-auto" style="width: 100px;"></div></td>
+            </tr>
+        `).join('');
+    }
+}
+
 async function caricaOrdini() {
+    mostraSkeletonOrdini(); // Mostriamo gli scheletri
+
     try {
         const utenteSalvato = localStorage.getItem('utenteLoggato');
         if (!utenteSalvato) return;
@@ -142,7 +161,6 @@ async function caricaOrdini() {
             const piattiList = ordine.piatti.map(p => `<strong class="text-dark">${escapeHTML(p.quantita)}x</strong> ${escapeHTML(p.nomePiatto)}`).join('<br>');
             const nomeCliente = ordine.utente ? `${escapeHTML(ordine.utente.nome)} ${escapeHTML(ordine.utente.cognome)}` : 'Cliente Sconosciuto';
 
-            // Badge colori per la dashboard
             let badgeStatoColore = 'bg-secondary';
             if (ordine.stato === 'In attesa') badgeStatoColore = 'bg-warning text-dark';
             if (ordine.stato === 'In preparazione') badgeStatoColore = 'bg-primary';
@@ -151,7 +169,7 @@ async function caricaOrdini() {
             if (ordine.stato !== 'Consegnato') {
                 const stati = ['In attesa', 'In preparazione', 'Consegnato'];
                 selectStato = `
-                    <select class="form-select form-select-sm w-auto select-stato-ordine bg-light border-0 fw-bold text-secondary rounded-pill px-3 shadow-none" data-id="${escapeHTML(String(ordine._id))}">
+                    <select class="form-select form-select-sm w-auto select-stato-ordine bg-light border-0 fw-bold text-secondary rounded-pill px-3 shadow-none mx-auto" data-id="${escapeHTML(String(ordine._id))}">
                         ${stati.map(s => `<option value="${escapeHTML(s)}" ${ordine.stato === s ? 'selected' : ''}>${escapeHTML(s)}</option>`).join('')}
                     </select>
                 `;
@@ -167,7 +185,7 @@ async function caricaOrdini() {
                     <td class="small py-3 text-muted">${piattiList}</td>
                     <td class="fw-bold text-success py-3 fs-5">${escapeHTML(ordine.prezzoTotale.toFixed(2))} €</td>
                     <td class="py-3"><span class="badge ${badgeStatoColore} rounded-pill px-3 py-2">${escapeHTML(ordine.stato)}</span></td>
-                    <td class="py-3 pe-4 text-end">${selectStato}</td>
+                    <td class="py-3 pe-4 text-center">${selectStato}</td>
                 </tr>
             `;
         }).join('');
@@ -192,12 +210,14 @@ async function aggiornaStato(idOrdine, nuovoStato) {
         if (!response.ok) throw new Error('Errore nella risposta del server');
 
         if (response.ok) {
+            mostraNotifica("Stato ordine aggiornato", "success");
             await caricaOrdini();
         } else {
-            alert('Errore durante l\'aggiornamento dello stato.');
+            mostraNotifica("Errore durante l'aggiornamento dello stato.", "error");
         }
     } catch (error) {
         console.error("Errore aggiornamento:", error);
+        mostraNotifica("Errore di connessione durante l'aggiornamento.", "error");
     }
 }
 
@@ -237,12 +257,13 @@ async function salvaRistorante(evento) {
                 mioRistoranteId = data.ristorante._id;
             }
 
-            alert('Dati del ristorante salvati con successo!');
+            mostraNotifica('Dati del ristorante salvati con successo!', 'success');
         } else {
-            alert('Errore durante il salvataggio.');
+            mostraNotifica('Errore durante il salvataggio.', 'error');
         }
     } catch (error) {
         console.error("Errore salvataggio ristorante:", error);
+        mostraNotifica('Errore di connessione con il server.', 'error');
     }
 }
 
@@ -273,15 +294,42 @@ async function salvaPiatto(evento) {
         });
 
         if (response.ok) {
-            alert('Piatto aggiunto al tuo menu con successo!');
+            mostraNotifica('Piatto aggiunto al tuo menu con successo!', 'success');
             evento.target.reset();
             caricaMioMenu();
         } else {
-            alert('Errore durante l\'inserimento del piatto.');
+            mostraNotifica('Errore durante l\'inserimento del piatto.', 'error');
         }
     } catch (error) {
         console.error("Errore salvataggio piatto:", error);
+        mostraNotifica('Errore di connessione con il server.', 'error');
     }
+}
+
+// SKELETON: MENU E CATALOGO
+function mostraSkeletonCards(containerId) {
+    const contenitore = document.getElementById(containerId);
+    if (!contenitore) return;
+
+    contenitore.innerHTML = Array(3).fill(`
+        <div class="col">
+            <div class="skeleton-card h-100">
+                <div class="skeleton-element skeleton-img"></div>
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="skeleton-element skeleton-title m-0"></div>
+                    </div>
+                    <div class="d-flex gap-2 mb-3">
+                        <div class="skeleton-element skeleton-badge"></div>
+                    </div>
+                    <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="skeleton-element skeleton-title w-25 m-0"></div>
+                        <div class="skeleton-element skeleton-btn"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 let catalogoDiSistema = [];
@@ -291,6 +339,8 @@ setTimeout(() => {
 }, 500);
 
 async function caricaCatalogo() {
+    mostraSkeletonCards('contenitore-catalogo'); // Mostra scheletri
+
     try {
         const response = await fetch(`${API_URL}/meals`);
         if (!response.ok) throw new Error('Errore nel recupero del catalogo');
@@ -306,7 +356,6 @@ async function caricaCatalogo() {
             return;
         }
 
-        // Stile allineato ad app.js (Card moderne, bordo 16px, pulsanti a pillola)
         contenitore.innerHTML = catalogoDiSistema.map(piatto => {
             return `
                 <div class="col">
@@ -342,7 +391,7 @@ async function copiaPiattoNelMenu(idPiattoBase) {
 
     const giaPresente = mioMenuGlobale.some(p => p.strMeal.toLowerCase() === piattoScelto.strMeal.toLowerCase());
     if (giaPresente) {
-        alert("Attenzione: Questo piatto è già presente nel tuo menu!");
+        mostraNotifica("Questo piatto è già presente nel tuo menu!", "error");
         return; 
     }
 
@@ -371,17 +420,20 @@ async function copiaPiattoNelMenu(idPiattoBase) {
         if (!response.ok) throw new Error('Errore durante la copia del piatto nel db');
 
         if (response.ok) {
-            alert(`"${piattoScelto.strMeal}" aggiunto al tuo menu!`);
+            mostraNotifica(`"${piattoScelto.strMeal}" aggiunto al tuo menu!`, "success");
             caricaMioMenu();
         } else {
-            alert('Errore durante la copia del piatto.');
+            mostraNotifica('Errore durante l\'aggiunta del piatto.', 'error');
         }
     } catch (error) {
         console.error("Errore copia piatto:", error);
+        mostraNotifica('Errore di connessione.', 'error');
     }
 }
 
 async function caricaMioMenu() {
+    mostraSkeletonCards('contenitore-mio-menu'); // Mostra scheletri
+
     try {
         const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
         const response = await fetch(`${API_URL}/meals`);
@@ -397,7 +449,6 @@ async function caricaMioMenu() {
             return;
         }
 
-        // Stile allineato ad app.js
         contenitore.innerHTML = mioMenuGlobale.map(piatto => {
             let bloccoPrezzo = `<h4 class="fw-bold text-success m-0">${piatto.prezzo ? piatto.prezzo.toFixed(2) : "0.00"} €</h4>`;
             let badgeSconto = '';
@@ -446,9 +497,13 @@ async function caricaMioMenu() {
 }
 
 async function eliminaPiattoDalMenu(idMeal) {
-    if (!confirm("Sei sicuro di voler rimuovere definitivamente questo piatto dal tuo menu?")) {
-        return;
-    }
+    const confermato = await mostraConferma(
+        "Elimina Piatto", 
+        "Sei sicuro di voler rimuovere definitivamente questo piatto dal tuo menu?", 
+        "Sì, Elimina"
+    );
+
+    if (!confermato) return;
 
     try {
         const response = await fetch(`${API_URL}/meals/${idMeal}`, {
@@ -462,13 +517,14 @@ async function eliminaPiattoDalMenu(idMeal) {
             const modal = bootstrap.Modal.getInstance(modalEl);
             if(modal) modal.hide();
 
-            alert("Piatto eliminato con successo!");
+            mostraNotifica("Piatto eliminato con successo!", "success");
             caricaMioMenu();
         } else {
-            alert("Errore durante l'eliminazione del piatto.");
+            mostraNotifica("Errore durante l'eliminazione del piatto.", "error");
         }
     } catch (error) {
         console.error("Errore eliminazione piatto:", error);
+        mostraNotifica("Errore di connessione.", "error");
     }
 }
 
@@ -526,12 +582,15 @@ async function salvaModifichePiatto(evento) {
             const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
             evento.target.reset();
+            
+            mostraNotifica("Modifiche salvate con successo!", "success");
             caricaMioMenu();
         } else {
-            alert('Errore durante il salvataggio delle modifiche.');
+            mostraNotifica('Errore durante il salvataggio delle modifiche.', "error");
         }
     } catch (error) {
         console.error("Errore salvataggio piatto:", error);
+        mostraNotifica('Errore di connessione col server.', "error");
     }
 }
 

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+/* global mostraNotifica, mostraConferma, API_URL */
 
 document.addEventListener('DOMContentLoaded', async () => {
     const utenteSalvato = localStorage.getItem('utenteLoggato');
@@ -10,32 +10,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sessione = JSON.parse(utenteSalvato);
     const uid = sessione.utente.id;
 
+    mostraSkeletonProfilo();
+
     try {
         const response = await fetch(`${API_URL}/users/${uid}`);
         if (!response.ok) throw new Error("Recupero profilo fallito");
         
         const utente = await response.json();
 
+        // 2. I dati sono arrivati: popoliamo i campi (lo scheletro sparisce perché scriviamo nel value)
         const profNome = document.getElementById('prof-nome');
-            if (profNome) profNome.value = utente.nome || '';
+        if (profNome) {
+            profNome.value = utente.nome || '';
+            profNome.classList.remove('skeleton-element'); // Rimuoviamo l'effetto se applicato al campo
+        }
 
-            const profCognome = document.getElementById('prof-cognome');
-            if (profCognome) profCognome.value = utente.cognome || '';
+        const profCognome = document.getElementById('prof-cognome');
+        if (profCognome) profCognome.value = utente.cognome || '';
 
-            const profEmail = document.getElementById('prof-email');
-            if (profEmail) profEmail.value = utente.email || '';
+        const profEmail = document.getElementById('prof-email');
+        if (profEmail) profEmail.value = utente.email || '';
 
-            const profIndirizzo = document.getElementById('prof-indirizzo');
-            if (profIndirizzo) profIndirizzo.value = utente.indirizzo || '';
+        const profIndirizzo = document.getElementById('prof-indirizzo');
+        if (profIndirizzo) profIndirizzo.value = utente.indirizzo || '';
 
-            const profTipoPag = document.getElementById('prof-tipo-pag');
-            if (profTipoPag) profTipoPag.value = utente.metodoPagamento?.tipo || 'Contanti';
+        const profTipoPag = document.getElementById('prof-tipo-pag');
+        if (profTipoPag) profTipoPag.value = utente.metodoPagamento?.tipo || 'Contanti';
 
-            const profPref = document.getElementById('prof-pref');
-            if (profPref) profPref.value = utente.preferenze || '';
+        const profPref = document.getElementById('prof-pref');
+        if (profPref) profPref.value = utente.preferenze || '';
+
     } catch (error) {
         console.error("Errore nel recupero dati profilo:", error);
-        alert("Impossibile caricare le informazioni del profilo.");
+        mostraNotifica("Impossibile caricare le informazioni del profilo.", "error");
     }
 
     const formProfilo = document.getElementById('form-profilo');
@@ -61,14 +68,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 if (response.ok) {
-                    alert('Profilo aggiornato con successo!');
+                    mostraNotifica('Profilo aggiornato con successo!', 'success');
                 } else {
                     const errore = await response.json();
-                    alert(`Errore durante l'aggiornamento: ${errore.message || ''}`);
+                    mostraNotifica(`Errore durante l'aggiornamento: ${errore.message || ''}`, 'error');
                 }
             } catch (error) {
                 console.error("Errore salvataggio profilo:", error);
-                alert("Problema di connessione con il server.");
+                mostraNotifica("Problema di connessione con il server.", "error");
             }
         });
     }
@@ -79,10 +86,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+function mostraSkeletonProfilo() {
+    const campi = ['prof-nome', 'prof-cognome', 'prof-email', 'prof-indirizzo', 'prof-pref'];
+    
+    campi.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.placeholder = "Caricamento...";
+            el.style.background = "#e2e5e7"; 
+            el.classList.add('skeleton-element');
+        }
+    });
+}
+
 async function eliminaAccount() {
-    if (!confirm("Sei sicuro? Questa azione cancellerà il tuo profilo definitivamente.")) {
-        return;
-    }
+    const confermato = await mostraConferma(
+        "Elimina Account", 
+        "Sei sicuro? Questa azione cancellerà il tuo profilo definitivamente e non potrà essere annullata.", 
+        "Sì, Elimina Account"
+    );
+
+    if (!confermato) return;
 
     try {
         const utenteSalvato = localStorage.getItem('utenteLoggato');
@@ -99,9 +123,10 @@ async function eliminaAccount() {
             localStorage.removeItem('utenteLoggato');
             window.location.href = 'register.html';
         } else {
-            alert('Impossibile eliminare l\'account.');
+            mostraNotifica('Impossibile eliminare l\'account.', 'error');
         }
     } catch (error) {
         console.error("Errore eliminazione account:", error);
+        mostraNotifica("Errore di connessione durante l'eliminazione.", "error");
     }
 }

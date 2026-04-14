@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const Meal = require('./models/Meal');
 
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env'), quiet: true });
 
 const mongoURI = process.env.MONGO_URI;
 

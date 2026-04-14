@@ -5,7 +5,7 @@
   "main": "backend/src/server.js",
   "scripts": {
     "start": "node backend/src/server.js",
-    "dev": "nodemon backend/src/server.js"
+    "dev": "nodemon --no-deprecation backend/src/server.js"
   },
   "repository": {
     "type": "git",
