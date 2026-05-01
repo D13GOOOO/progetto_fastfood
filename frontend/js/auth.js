@@ -1,5 +1,6 @@
 /* global API_URL, mostraNotifica */
 
+// Genera e visualizza un toast di notifica temporaneo per i feedback legati all'autenticazione (successo o errore).
 function mostraNotificaAuth(messaggio, tipo = 'error') {
     let container = document.getElementById('toast-container-custom');
     if (!container) {
@@ -30,12 +31,14 @@ function mostraNotificaAuth(messaggio, tipo = 'error') {
     }, 6000);
 }
 
+// Dizionario delle espressioni regolari (Regex) utilizzate per la validazione strutturale dei campi del form.
 const regoleValidazione = {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     password: /^(?=.*[A-Za-z])(?=.*\d).{6,}$/, 
     testo: /^[A-Za-zÀ-ÿ\s']{2,}$/ 
 };
 
+// Valida il contenuto di un input in tempo reale confrontandolo con la Regex, aggiornando le classi CSS per il feedback visivo (verde/rosso).
 function validaCampo(input, tipoRegola) {
     if (!input) return true;
     
@@ -60,6 +63,7 @@ function validaCampo(input, tipoRegola) {
     return isValid;
 }
 
+// Inizializza la gestione dei form di autenticazione: aggancia gli eventi di validazione live e gestisce le chiamate API per login e registrazione.
 document.addEventListener('DOMContentLoaded', () => {
     const apiEndpoint = typeof API_URL !== 'undefined' ? API_URL : '/api';
 
@@ -78,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
+        // Gestisce il processo di Login: esegue una pre-validazione, invia le credenziali al server e indirizza l'utente alla dashboard corretta.
         loginForm.addEventListener('submit', async (evento) => {
             evento.preventDefault();
 
@@ -121,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
+        // Gestisce il processo di Registrazione: richiede che tutti i campi superino la validazione Regex prima di inoltrare il payload al server.
         registerForm.addEventListener('submit', async (evento) => {
             evento.preventDefault();
 

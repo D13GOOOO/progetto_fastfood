@@ -2,6 +2,7 @@
 
 let ristorantiOriginali = [];
 
+// Inizializza l'ambiente al caricamento della pagina: avvia il recupero asincrono dei dati dei ristoranti e associa l'event listener al form di ricerca locale.
 document.addEventListener('DOMContentLoaded', () => {
     caricaRistoranti().catch(console.error);
 
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Inietta una struttura DOM temporanea (skeleton loading) per preservare il layout a griglia e fornire un feedback visivo durante la latenza di rete.
 function mostraSkeletonRistoranti() {
     const contenitore = document.getElementById('ristoranti-container');
     if (!contenitore) return;
@@ -36,6 +38,7 @@ function mostraSkeletonRistoranti() {
     `).join('');
 }
 
+// Esegue una richiesta GET all'API per estrarre l'elenco globale dei ristoranti, memorizza la risposta per le operazioni di filtraggio lato client e ne innesca il rendering.
 async function caricaRistoranti() {
 
     mostraSkeletonRistoranti();
@@ -62,6 +65,7 @@ async function caricaRistoranti() {
     }
 }
 
+// Itera l'array dei ristoranti fornito come parametro, genera dinamicamente l'HTML delle card elaborando i dati anagrafici e inietta il risultato nel contenitore DOM. Gestisce anche l'empty state.
 function renderizzaRistoranti(ristoranti) {
     const contenitore = document.getElementById('ristoranti-container');
     if (!contenitore) return;
@@ -123,6 +127,7 @@ function renderizzaRistoranti(ristoranti) {
     }).join('');
 }
 
+// Intercetta l'evento di submit del form di ricerca per applicare un filtro non case-sensitive sull'array in memoria, re-invocando il rendering grafico sul nuovo sottoinsieme.
 function applicaFiltriRistoranti(e) {
     e.preventDefault();
 

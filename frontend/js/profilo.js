@@ -1,5 +1,6 @@
 /* global mostraNotifica, mostraConferma, API_URL */
 
+// Inizializza la vista del profilo: verifica l'autenticazione, applica il loader visivo (skeleton) e recupera i dati anagrafici dal server.
 document.addEventListener('DOMContentLoaded', async () => {
     const utenteSalvato = localStorage.getItem('utenteLoggato');
     if (!utenteSalvato) {
@@ -18,11 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const utente = await response.json();
 
-        // 2. I dati sono arrivati: popoliamo i campi (lo scheletro sparisce perché scriviamo nel value)
+        // Compila i campi del form rimuovendo lo stato di caricamento visivo una volta ricevuti i dati dal backend.
         const profNome = document.getElementById('prof-nome');
         if (profNome) {
             profNome.value = utente.nome || '';
-            profNome.classList.remove('skeleton-element'); // Rimuoviamo l'effetto se applicato al campo
+            profNome.classList.remove('skeleton-element'); 
         }
 
         const profCognome = document.getElementById('prof-cognome');
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const formProfilo = document.getElementById('form-profilo');
     if (formProfilo) {
+        // Intercetta il submit del form per strutturare il payload di aggiornamento e trasmetterlo all'API tramite richiesta PUT.
         formProfilo.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -86,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// Inietta classi CSS e stili temporanei sui campi di input per fornire un feedback visivo (skeleton loading) durante l'attesa della risposta di rete.
 function mostraSkeletonProfilo() {
     const campi = ['prof-nome', 'prof-cognome', 'prof-email', 'prof-indirizzo', 'prof-pref'];
     
@@ -99,6 +102,7 @@ function mostraSkeletonProfilo() {
     });
 }
 
+// Richiede conferma esplicita prima di inoltrare una richiesta DELETE per la rimozione permanente dell'account, invalidando poi la sessione locale.
 async function eliminaAccount() {
     const confermato = await mostraConferma(
         "Elimina Account", 
