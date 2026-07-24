@@ -1,4 +1,5 @@
 import { API_URL, escapeHTML, mostraNotifica, mostraConferma } from './utils.js';
+import { getSessioneUtente, getAuthHeaders } from './session.js';
 
 export let mioMenuGlobale = [];
 export let catalogoDiSistema = [];
@@ -35,7 +36,11 @@ export async function salvaPiatto(evento) {
 
     const stringaIngredienti = document.getElementById('piatto-ingredienti').value;
     const arrayIngredienti = stringaIngredienti.split(',').map(ing => ing.trim());
-    const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
+    const datiUtente = getSessioneUtente();
+    if (!datiUtente) {
+        window.location.href = 'login.html';
+        return;
+    }
 
     const payload = {
         strMeal: document.getElementById('piatto-nome').value,
@@ -46,13 +51,13 @@ export async function salvaPiatto(evento) {
         strArea: "Personalizzato",
         strInstructions: "Piatto creato dal ristoratore.",
         measures: [],
-        creatore: datiUtente.utente.id
+        creatore: datiUtente.id
     };
 
     try {
         const response = await fetch(`${API_URL}/meals`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
 
@@ -128,7 +133,11 @@ export async function copiaPiattoNelMenu(idPiattoBase) {
         return; 
     }
 
-    const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
+    const datiUtente = getSessioneUtente();
+    if (!datiUtente) {
+        window.location.href = 'login.html';
+        return;
+    }
 
     const payload = {
         idMeal: new Date().getTime().toString(),
@@ -140,13 +149,13 @@ export async function copiaPiattoNelMenu(idPiattoBase) {
         strArea: piattoScelto.strArea,
         strInstructions: piattoScelto.strInstructions,
         measures: piattoScelto.measures,
-        creatore: datiUtente.utente.id
+        creatore: datiUtente.id
     };
 
     try {
         const response = await fetch(`${API_URL}/meals`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
 
@@ -169,12 +178,20 @@ export async function caricaMioMenu() {
     mostraSkeletonCards('contenitore-mio-menu'); 
 
     try {
-        const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
+        const datiUtente = getSessioneUtente();
+        if (!datiUtente) {
+            const contenitore = document.getElementById('contenitore-mio-menu');
+            if (contenitore) {
+                contenitore.innerHTML = '<p class="text-danger text-center w-100 py-5">Sessione non valida. Effettua di nuovo l\'accesso.</p>';
+            }
+            return;
+        }
+
         const response = await fetch(`${API_URL}/meals`);
         if (!response.ok) throw new Error('Errore nel recupero del menu');
         const tuttiIPiatti = await response.json();
 
-        mioMenuGlobale = tuttiIPiatti.filter(p => String(p.creatore) === String(datiUtente.utente.id));
+        mioMenuGlobale = tuttiIPiatti.filter(p => String(p.creatore) === String(datiUtente.id));
         const contenitore = document.getElementById('contenitore-mio-menu');
         if (!contenitore) return;
 
@@ -241,8 +258,14 @@ export async function eliminaPiattoDalMenu(idMeal) {
     if (!confermato) return;
 
     try {
+        const datiUtente = getSessioneUtente();
+        if (!datiUtente) {
+            window.location.href = 'login.html';
+            return;
+        }
         const response = await fetch(`${API_URL}/meals/${idMeal}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) throw new Error('Errore durante eliminazione');
@@ -253,7 +276,7 @@ export async function eliminaPiattoDalMenu(idMeal) {
             const modal = bootstrap.Modal.getInstance(modalEl);
             if(modal) modal.hide();
 
-            mostraNotifica("Piatto eliminato con successo!", "success");
+            mostraNotifica("Piatto eliminado con successo!", "success");
             caricaMioMenu();
         } else {
             mostraNotifica("Errore durante l'eliminazione del piatto.", "error");
@@ -296,6 +319,11 @@ export function apriModalGestisciPiatto(idMeal) {
 export async function salvaModifichePiatto(evento) {
     evento.preventDefault();
     const idMeal = document.getElementById('mod-id-piatto').value;
+    const datiUtente = getSessioneUtente();
+    if (!datiUtente) {
+        window.location.href = 'login.html';
+        return;
+    }
 
     const payload = {
         strMeal: document.getElementById('mod-nome').value,
@@ -310,7 +338,7 @@ export async function salvaModifichePiatto(evento) {
     try {
         const response = await fetch(`${API_URL}/meals/${idMeal}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
 

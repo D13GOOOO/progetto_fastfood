@@ -1,16 +1,17 @@
 import { API_URL, mostraNotifica } from './utils.js';
+import { getSessioneUtente, getAuthHeaders } from './session.js';
 
 let mioRistoranteId = null;
 
 // Richiama i metadati del profilo ristorante pre-esitente in base all'ID titolare per auto-popolare i campi di configurazione nell'UI.
 export async function caricaDatiRistorante() {
-    const utenteSalvato = localStorage.getItem('utenteLoggato');
-    if (!utenteSalvato) return;
-
-    const datiUtente = JSON.parse(utenteSalvato);
+    const datiUtente = getSessioneUtente();
+    if (!datiUtente) return;
 
     try {
-        const response = await fetch(`${API_URL}/restaurants/titolare/${datiUtente.utente.id}`);
+        const response = await fetch(`${API_URL}/restaurants/titolare/${datiUtente.id}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Errore nel recupero dati ristorante');
 
         if (response.ok) {
@@ -33,14 +34,18 @@ export async function caricaDatiRistorante() {
 // Raccoglie i dati anagrafici dal form ed effettua una richiesta POST (creazione) o PUT (aggiornamento) per profilare il ristorante nel database.
 export async function salvaRistorante(evento) {
     evento.preventDefault();
-    const datiUtente = JSON.parse(localStorage.getItem('utenteLoggato'));
+    const datiUtente = getSessioneUtente();
+    if (!datiUtente) {
+        window.location.href = 'login.html';
+        return;
+    }
 
     const payload = {
         nome: document.getElementById('rest-nome').value,
         partitaIva: document.getElementById('rest-piva').value,
         indirizzo: document.getElementById('rest-indirizzo').value,
         telefono: document.getElementById('rest-telefono').value,
-        titolare: datiUtente.utente.id
+        titolare: datiUtente.id
     };
 
     try {
@@ -56,7 +61,7 @@ export async function salvaRistorante(evento) {
 
         const response = await fetch(url, {
             method: metodo,
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
 

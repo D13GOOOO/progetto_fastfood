@@ -1,4 +1,5 @@
 import { API_URL, escapeHTML, mostraNotifica } from './utils.js';
+import { getSessioneUtente, getAuthHeaders } from './session.js';
 
 // Inietta una struttura DOM segnaposto (skeleton) per la tabella degli ordini per migliorare l'esperienza utente durante il parsing di rete.
 export function mostraSkeletonOrdini() {
@@ -22,34 +23,38 @@ export async function caricaOrdini() {
     mostraSkeletonOrdini(); 
 
     try {
-        const utenteSalvato = localStorage.getItem('utenteLoggato');
-        if (!utenteSalvato) return;
+        const datiUtente = getSessioneUtente();
+        if (!datiUtente) return;
 
-        const datiUtente = JSON.parse(utenteSalvato);
-        const response = await fetch(`${API_URL}/orders?ristoratoreId=${datiUtente.utente.id}`);
+        try {
+            const statsResponse = await fetch(`${API_URL}/orders/stats/${datiUtente.id}`, {
+                headers: getAuthHeaders()
+            });
+            if (statsResponse.ok) {
+                const stats = await statsResponse.json();
+                const statIncassi = document.getElementById('stat-incassi');
+                const statTotali = document.getElementById('stat-totali');
+                const statPendenti = document.getElementById('stat-pendenti');
+                const statPiattoTop = document.getElementById('stat-piatto-top');
+
+                if (statIncassi) statIncassi.innerText = stats.incassi.toFixed(2) + ' €';
+                if (statTotali) statTotali.innerText = String(stats.totali);
+                if (statPendenti) statPendenti.innerText = String(stats.pendenti);
+                if (statPiattoTop) {
+                    statPiattoTop.innerText = escapeHTML(stats.piattoTop);
+                    statPiattoTop.title = escapeHTML(stats.piattoTop);
+                }
+            }
+        } catch (e) {
+            console.error("Errore recupero statistiche:", e);
+        }
+
+        const response = await fetch(`${API_URL}/orders?ristoratoreId=${datiUtente.id}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Errore di rete durante il recupero ordini');
         const ordini = await response.json();
         const tbody = document.getElementById('tabella-ordini');
-
-        const statIncassi = document.getElementById('stat-incassi');
-        const statTotali = document.getElementById('stat-totali');
-        const statPendenti = document.getElementById('stat-pendenti');
-
-        if (statIncassi && statTotali && statPendenti) {
-            let totaleGuadagni = 0;
-            let ordiniPendenti = 0;
-
-            ordini.forEach(o => {
-                totaleGuadagni += o.prezzoTotale;
-                if (o.stato !== 'Consegnato') {
-                    ordiniPendenti++;
-                }
-            });
-
-            statIncassi.innerText = totaleGuadagni.toFixed(2) + ' €';
-            statTotali.innerText = String(ordini.length);
-            statPendenti.innerText = String(ordiniPendenti);
-        }
 
         if (!tbody) return;
 
@@ -64,16 +69,16 @@ export async function caricaOrdini() {
             const dataFormattata = new Date(ordine.dataOrdine).toLocaleString('it-IT', {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'
             });
-            const piattiList = ordine.piatti.map(p => `<strong class="text-dark">${escapeHTML(p.quantita)}x</strong> ${escapeHTML(p.nomePiatto)}`).join('<br>');
+            const piattiList = ordine.piatti.map(p => `<strong class="text-dark">${escapeHTML(String(p.quantita))}x</strong> ${escapeHTML(p.nomePiatto)}`).join('<br>');
             const nomeCliente = ordine.utente ? `${escapeHTML(ordine.utente.nome)} ${escapeHTML(ordine.utente.cognome)}` : 'Cliente Sconosciuto';
 
             let badgeStatoColore = 'bg-secondary';
-            if (ordine.stato === 'In attesa') badgeStatoColore = 'bg-warning text-dark';
+            if (ordine.stato === 'Ordinato') badgeStatoColore = 'bg-warning text-dark';
             if (ordine.stato === 'In preparazione') badgeStatoColore = 'bg-primary';
 
             let selectStato;
             if (ordine.stato !== 'Consegnato') {
-                const stati = ['In attesa', 'In preparazione', 'Consegnato'];
+                const stati = ['Ordinato', 'In preparazione', 'Consegnato'];
                 selectStato = `
                     <select class="form-select form-select-sm w-auto select-stato-ordine bg-light border-0 fw-bold text-secondary rounded-pill px-3 shadow-none mx-auto" data-id="${escapeHTML(String(ordine._id))}">
                         ${stati.map(s => `<option value="${escapeHTML(s)}" ${ordine.stato === s ? 'selected' : ''}>${escapeHTML(s)}</option>`).join('')}
@@ -108,9 +113,13 @@ export async function caricaOrdini() {
 // Esegue una richiesta PUT al server per aggiornare lo stato di elaborazione di un singolo ordine. Richiama un refresh della tabella su esito positivo.
 export async function aggiornaStato(idOrdine, nuovoStato) {
     try {
+        const datiUtente = getSessioneUtente();
         const response = await fetch(`${API_URL}/orders/${idOrdine}/status`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
             body: JSON.stringify({ stato: nuovoStato })
         });
 

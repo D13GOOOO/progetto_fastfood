@@ -87,11 +87,23 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-3" id="wrapper-pagamento">
+                        <label for="reg-pagamento" class="form-label text-muted small fw-bold mb-1">Metodo di Pagamento Predefinito</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-credit-card"></i></span>
+                            <select class="form-select bg-light border-0 py-2 shadow-none" id="reg-pagamento" required>
+                                <option value="Contanti" selected>Pagamento alla consegna (Contanti/POS)</option>
+                                <option value="Carta di Credito">Carta di Credito</option>
+                                <option value="Prepagata">Carta Prepagata</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4" id="wrapper-preferenze">
                         <label for="reg-preferenze" class="form-label text-muted small fw-bold mb-1">Preferenze (Opzionale)</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-star"></i></span>
-                            <input type="text" class="form-control bg-light border-0 py-2 shadow-none" id="reg-preferenze" placeholder="Es. Vegano, Carne, Offerte sui Burger...">
+                            <input type="text" class="form-control bg-light border-0 py-2 shadow-none" id="reg-preferenze" placeholder="Es. Vegan, Beef, Chicken, Desserts...">
                         </div>
                         <div class="form-text text-muted mt-2" style="font-size: 0.75rem;"><i class="bi bi-info-circle me-1"></i>Dicci cosa ti piace, ti proporremo i piatti migliori!</div>
                     </div>
@@ -119,6 +131,6 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/auth.js"></script>
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>

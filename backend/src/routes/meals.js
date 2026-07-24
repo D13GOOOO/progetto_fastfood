@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Meal = require('../models/Meal');
 const mongoose = require('mongoose');
+const { controllaRuoloRistoratore } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -158,7 +159,7 @@ router.get('/', async (req, res) => {
  *                   type: string
  *                   description: Dettaglio tecnico dell'errore
  */
-router.post('/', async (req, res) => {
+router.post('/', controllaRuoloRistoratore, async (req, res) => {
     try {
         const { strMeal, prezzo, strCategory, strArea, strInstructions, strMealThumb, ingredients, measures, creatore } = req.body;
 
@@ -178,7 +179,7 @@ router.post('/', async (req, res) => {
             strMealThumb: strMealThumb || "https://via.placeholder.com/150",
             ingredients,
             measures,
-            creatore: creatore || "System"
+            creatore: req.user.id || creatore || "System"
         });
 
         await nuovoPiatto.save();
@@ -269,8 +270,17 @@ router.post('/', async (req, res) => {
  *                   type: string
  *                   example: "Errore interno del server"
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', controllaRuoloRistoratore, async (req, res) => {
     try {
+        const piattoEsistente = await Meal.findOne({ idMeal: req.params.id });
+        if (!piattoEsistente) {
+            return res.status(404).json({ message: "Piatto non trovato" });
+        }
+
+        if (String(piattoEsistente.creatore) !== String(req.user.id)) {
+            return res.status(403).json({ message: "Non puoi modificare un piatto creato da un altro ristoratore." });
+        }
+
         const {
             strMeal,
             prezzo,
@@ -292,7 +302,7 @@ router.put('/:id', async (req, res) => {
                 scontoPercentuale: scontoPercentuale || 0,
                 scontoScadenza: scontoScadenza ? new Date(scontoScadenza) : null
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!piattoAggiornato) {
@@ -352,13 +362,22 @@ router.put('/:id', async (req, res) => {
  *                   type: string
  *                   example: Errore interno del server
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', controllaRuoloRistoratore, async (req, res) => {
     try {
         const idDaCercare = req.params.id;
         const queryDiRicerca = { $or: [{ idMeal: String(idDaCercare) }] };
 
         if (mongoose.isValidObjectId(idDaCercare)) {
             queryDiRicerca.$or.push({ _id: idDaCercare });
+        }
+
+        const piattoEsistente = await Meal.findOne(queryDiRicerca);
+        if (!piattoEsistente) {
+            return res.status(404).json({ message: "Piatto non trovato" });
+        }
+
+        if (String(piattoEsistente.creatore) !== String(req.user.id)) {
+            return res.status(403).json({ message: "Non puoi eliminare un piatto creato da un altro ristoratore." });
         }
 
         const piattoEliminato = await Meal.findOneAndDelete(queryDiRicerca);

@@ -17,8 +17,8 @@ const orderSchema = new mongoose.Schema({
     indirizzoConsegna: { type: String, default: 'Ritiro in sede' },
     stato: {
         type: String,
-        enum: ['In attesa', 'In preparazione', 'Consegnato'],
-        default: 'In attesa',
+        enum: ['Ordinato', 'In preparazione', 'Consegnato'],
+        default: 'Ordinato',
     },
     ristoratoreId: { type: String, default: 'System' },
     tempoAttesa: { type: Number, default: 15 },

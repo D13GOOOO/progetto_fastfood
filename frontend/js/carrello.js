@@ -1,10 +1,21 @@
 import { API_URL, calcolaPrezzoReale, escapeHTML, mostraNotifica } from './utils.js';
+import { getSessioneUtente, getAuthHeaders } from './session.js';
 import { menuOriginale } from './menu.js';
 
 export let carrello = JSON.parse(localStorage.getItem('carrelloFastFood')) || [];
 
-// Aggiunge un piatto al carrello, impedendo l'inserimento se appartiene a un ristoratore diverso da quelli già presenti.
+// Aggiunge un piatto al carrello, impedendo l'inserimento se appartiene a un ristoratore diverso o se l'utente non è loggato.
 export function aggiungiAlCarrello(id, event) {
+    // 1. BLOCCO DI SICUREZZA: Verifica immediata del login
+    const sessione = getSessioneUtente();
+    if (!sessione) {
+        mostraNotifica("Devi effettuare l'accesso per poter ordinare!", "error");
+        // Opzionale: Reindirizzamento automatico
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return; // Interrompe subito l'esecuzione
+    }
+
+    // 2. LOGICA ORIGINALE DEL CARRELLO
     const piattoScelto = menuOriginale.find(p => String(p.idMeal) === String(id));
     if (piattoScelto) {
         if (carrello.length > 0) {
@@ -138,8 +149,8 @@ export async function inviaOrdine() {
         return;
     }
 
-    const utenteSalvato = localStorage.getItem('utenteLoggato');
-    if (!utenteSalvato) {
+    const sessione = getSessioneUtente();
+    if (!sessione) {
         mostraNotifica("Effettua l'accesso per ordinare.", "error");
         setTimeout(() => {
             window.location.href = 'login.html';
@@ -147,8 +158,7 @@ export async function inviaOrdine() {
         return;
     }
 
-    const datiUtente = JSON.parse(utenteSalvato);
-    const userId = datiUtente.utente.id;
+    const userId = sessione.id;
     const ristId = carrello[0].creatore;
 
     let totaleOrdine = 0;
@@ -162,14 +172,13 @@ export async function inviaOrdine() {
         utenteId: userId,
         piatti: piattiOrdinati,
         totale: parseFloat(totaleOrdine.toFixed(2)),
-        stato: "In attesa",
         ristoratoreId: ristId
     };
 
     try {
         const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payloadOrdine)
         });
 

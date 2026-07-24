@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const grigliaConsigliati = document.getElementById('griglia-consigliati');
+    if (grigliaConsigliati) {
+        grigliaConsigliati.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('btn-aggiungi-carrello')) {
+                const id = e.target.getAttribute('data-id');
+                aggiungiAlCarrello(id, e);
+            }
+        });
+    }
+
     // Gestione Eventi dei Filtri
     const formRicerca = document.getElementById('form-ricerca');
     if (formRicerca) {

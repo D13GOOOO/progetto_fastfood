@@ -1,19 +1,21 @@
 // ordini-cliente.js
 import { API_URL, escapeHTML } from './utils.js';
+import { getSessioneUtente, getAuthHeaders } from './session.js';
 
 // Scarica lo storico degli ordini dell'utente connesso e ne genera la rappresentazione grafica a schermo, ordinata per data.
 export async function caricaOrdiniUtente() {
-    const utenteSalvato = localStorage.getItem('utenteLoggato');
-    if (!utenteSalvato) {
+    const sessione = getSessioneUtente();
+    if (!sessione) {
         window.location.href = 'login.html';
         return;
     }
 
-    const datiUtente = JSON.parse(utenteSalvato);
-    const userId = datiUtente.utente.id;
+    const userId = sessione.id;
 
     try {
-        const response = await fetch(`${API_URL}/orders`);
+        const response = await fetch(`${API_URL}/orders`, {
+            headers: getAuthHeaders()
+        });
         
         if (!response.ok) throw new Error("Errore nel recupero degli ordini");
         
@@ -40,14 +42,18 @@ export async function caricaOrdiniUtente() {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'
             });
 
-            let coloreBadge = 'bg-warning text-dark';
+            let coloreBadge = 'bg-secondary';
             let extraUi = '';
 
-            if (ordine.stato === 'In preparazione' || ordine.stato === 'In attesa') {
+            if (ordine.stato === 'Ordinato') {
+                coloreBadge = 'bg-warning text-dark';
+                extraUi = `<div class="text-danger small mt-3 fw-bold">⏳ Attesa stimata: ${escapeHTML(String(ordine.tempoAttesa || 15))} minuti</div>`;
+            } else if (ordine.stato === 'In preparazione') {
+                coloreBadge = 'bg-primary';
                 extraUi = `<div class="text-danger small mt-3 fw-bold">⏳ Attesa stimata: ${escapeHTML(String(ordine.tempoAttesa || 15))} minuti</div>`;
             } else if (ordine.stato === 'Consegnato') {
                 coloreBadge = 'bg-success';
-                extraUi = `<div class="text-success small mt-3 fw-bold">✔️ Ordine Completato</div>`;
+                extraUi = `<div class="text-success small mt-3 fw-bold">✔️ Ordine Completato (Ritirato)</div>`;
             }
 
             const listaPiatti = ordine.piatti.map(p =>
@@ -86,3 +92,7 @@ export async function caricaOrdiniUtente() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    caricaOrdiniUtente().catch(console.error);
+});

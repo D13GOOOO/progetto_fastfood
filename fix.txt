@@ -1,7 +1,0 @@
-◇ injected env (1) from .env // tip: ⌘ suppress logs { quiet: true }
-(node:22700) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
-(Use `node --trace-deprecation ...` to show where the warning was created)
-Server avviato! Frontend: http://localhost:3000/ | API Docs: http://localhost:3000/api-docs
-Connesso con successo a MongoDB Atlas!
-(node:22700) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
-(node:22700) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.

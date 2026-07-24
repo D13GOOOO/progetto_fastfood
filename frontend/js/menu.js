@@ -1,4 +1,5 @@
 import { API_URL, calcolaPrezzoReale, escapeHTML } from './utils.js';
+import { getSessioneUtente } from './session.js';
 
 export let menuOriginale = [];
 export let ristorantiGlobali = [];
@@ -22,17 +23,24 @@ export async function caricaMenu() {
 
         const urlParams = new URLSearchParams(window.location.search);
         const idRistoratore = urlParams.get('ristoratore');
+        const heroTitle = document.getElementById('titolo-tutto-menu');
 
         if (idRistoratore) {
+            // Contesto: Pagina Ristorante Singolo
             menuOriginale = piatti.filter(p => String(p.creatore) === String(idRistoratore));
-            const heroTitle = document.querySelector('.hero-section h1');
             if(heroTitle) heroTitle.innerText = "Il nostro Menu Speciale";
         } else {
+            // Contesto: Home Page (escludiamo i template del catalogo globale di "System")
             menuOriginale = piatti.filter(p => p.creatore && p.creatore !== 'System').reverse();
+            if(heroTitle) heroTitle.innerText = "Tutto il Menu";
         }
 
         popolaCategorie(menuOriginale);
         renderizzaMenu(menuOriginale);
+        
+        // Passiamo l'array menuOriginale (già contestualizzato) al motore di raccomandazione
+        await caricaPiattiConsigliati(menuOriginale);
+
     } catch (error) {
         console.error("Errore:", error);
         const contenitore = document.getElementById('menu-container');
@@ -227,4 +235,113 @@ export function mostraSkeletonMenu() {
     `).join('');
 
     contenitore.innerHTML = skeletonHtml;
+}
+
+// Motore di raccomandazione: filtra l'array di piatti fornito in input (Home Globale o Menu Singolo Ristorante)
+export async function caricaPiattiConsigliati(piattiContestoCorrente) {
+    const contenitoreConsigliati = document.getElementById('sezione-consigliati');
+    const grigliaConsigliati = document.getElementById('griglia-consigliati');
+    
+    if (!contenitoreConsigliati || !grigliaConsigliati) return;
+
+    // Se l'array del menu è vuoto (es. ristorante senza piatti), disattiviamo subito la vetrina
+    if (!piattiContestoCorrente || piattiContestoCorrente.length === 0) {
+        contenitoreConsigliati.classList.add('d-none');
+        return;
+    }
+
+    const sessione = getSessioneUtente();
+    if (!sessione) {
+        contenitoreConsigliati.classList.add('d-none');
+        return;
+    }
+
+    if (sessione.ruolo !== 'cliente') {
+        contenitoreConsigliati.classList.add('d-none');
+        return;
+    }
+
+    const preferenzeRaw = sessione.preferenze || [];
+    const preferenzeArray = Array.isArray(preferenzeRaw) ? preferenzeRaw : preferenzeRaw.split(',').map(s => s.trim());
+    
+    contenitoreConsigliati.classList.remove('d-none');
+    grigliaConsigliati.innerHTML = Array(4).fill(`
+        <div class="col">
+            <div class="skeleton-card h-100 border-0" style="border-radius: 16px; box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);">
+                <div class="skeleton-element skeleton-img" style="height: 180px;"></div>
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="skeleton-element skeleton-title w-75 mb-3"></div>
+                    <div class="skeleton-element skeleton-badge w-50 mb-3"></div>
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div class="skeleton-element skeleton-title w-25 m-0"></div>
+                        <div class="skeleton-element skeleton-btn" style="width: 100px; height: 38px; border-radius: 50rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    try {
+        // Usiamo l'array già filtrato invece di interrogare nuovamente il database!
+        let piattiSuggeriti = piattiContestoCorrente.filter(piatto => {
+            const matchPreferenza = preferenzeArray.some(pref => {
+                if (!pref) return false;
+                const term = pref.toLowerCase();
+                
+                const inCat = piatto.strCategory && piatto.strCategory.toLowerCase().includes(term);
+                const inIngr = Array.isArray(piatto.ingredients) && piatto.ingredients.some(ing => ing && ing.toLowerCase().includes(term));
+                
+                return inCat || inIngr;
+            });
+            
+            const prezzoScontato = calcolaPrezzoReale(piatto);
+            const eInOfferta = prezzoScontato < (piatto.prezzo || 0);
+
+            return matchPreferenza || eInOfferta;
+        });
+
+        piattiSuggeriti = piattiSuggeriti.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+        if (piattiSuggeriti.length > 0) {
+            grigliaConsigliati.innerHTML = piattiSuggeriti.map(piatto => {
+                const prezzoScontato = calcolaPrezzoReale(piatto);
+                let badgeSconto = '';
+                
+                if (prezzoScontato < (piatto.prezzo || 0)) {
+                    badgeSconto = `<span class="badge bg-warning text-dark m-3 position-absolute top-0 start-0 shadow-sm fs-6 rounded-pill">-${piatto.scontoPercentuale}%</span>`;
+                }
+                
+                return `
+                <div class="col">
+                    <div class="card h-100 border-0" style="border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);">
+                        <div class="position-relative">
+                            ${badgeSconto}
+                            <img src="${escapeHTML(piatto.strMealThumb)}" class="card-img-top" style="height: 180px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=Nessuna+Foto'">
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title fw-bold m-0 lh-sm text-dark mb-3 text-truncate" title="${escapeHTML(piatto.strMeal)}">${escapeHTML(piatto.strMeal)}</h5>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-warning text-dark rounded-pill">#${escapeHTML(piatto.strCategory.toLowerCase())}</span>
+                            </div>
+                            
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold text-success m-0">${prezzoScontato.toFixed(2)} €</h5>
+                                <button class="btn btn-warning fw-bold rounded-pill shadow-sm px-3 py-2 btn-aggiungi-carrello" data-id="${escapeHTML(piatto.idMeal)}">
+                                    <i class="bi bi-cart-plus"></i> Aggiungi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } else {
+            contenitoreConsigliati.classList.add('d-none');
+            grigliaConsigliati.innerHTML = '';
+        }
+    } catch (error) {
+        console.error("Errore nel rendering dei consigliati:", error);
+        contenitoreConsigliati.classList.add('d-none');
+        grigliaConsigliati.innerHTML = '';
+    }
 }

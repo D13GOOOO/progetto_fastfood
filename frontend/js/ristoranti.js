@@ -1,4 +1,4 @@
-/* global escapeHTML, mostraNotifica, API_URL */
+import { API_URL, escapeHTML, mostraNotifica } from './utils.js';
 
 let ristorantiOriginali = [];
 

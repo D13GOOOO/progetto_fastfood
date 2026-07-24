@@ -1,15 +1,15 @@
-/* global mostraNotifica, mostraConferma, API_URL */
+import { API_URL, mostraNotifica, mostraConferma } from './utils.js';
+import { getSessioneUtente, getAuthHeaders, salvaAuthToken, rimuoviAuthToken } from './session.js';
 
 // Inizializza la vista del profilo: verifica l'autenticazione, applica il loader visivo (skeleton) e recupera i dati anagrafici dal server.
 document.addEventListener('DOMContentLoaded', async () => {
-    const utenteSalvato = localStorage.getItem('utenteLoggato');
-    if (!utenteSalvato) {
+    const sessione = getSessioneUtente();
+    if (!sessione) {
         window.location.href = 'login.html';
         return;
     }
 
-    const sessione = JSON.parse(utenteSalvato);
-    const uid = sessione.utente.id;
+    const uid = sessione.id;
 
     mostraSkeletonProfilo();
 
@@ -19,12 +19,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const utente = await response.json();
 
-        // Compila i campi del form rimuovendo lo stato di caricamento visivo una volta ricevuti i dati dal backend.
+        // 1. Rimuoviamo prima la "maschera" grigia e i placeholder da TUTTI i campi
+        const campiSkeletons = ['prof-nome', 'prof-cognome', 'prof-email', 'prof-indirizzo', 'prof-pref'];
+        campiSkeletons.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('skeleton-element');
+                el.style.background = ""; 
+                el.placeholder = ""; 
+            }
+        });
+
+        // 2. Compiliamo i campi con i dati veri
         const profNome = document.getElementById('prof-nome');
-        if (profNome) {
-            profNome.value = utente.nome || '';
-            profNome.classList.remove('skeleton-element'); 
-        }
+        if (profNome) profNome.value = utente.nome || '';
 
         const profCognome = document.getElementById('prof-cognome');
         if (profCognome) profCognome.value = utente.cognome || '';
@@ -39,7 +47,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (profTipoPag) profTipoPag.value = utente.metodoPagamento?.tipo || 'Contanti';
 
         const profPref = document.getElementById('prof-pref');
-        if (profPref) profPref.value = utente.preferenze || '';
+        if (profPref) {
+            // Se le preferenze sono un Array, le uniamo con una virgola
+            profPref.value = Array.isArray(utente.preferenze) ? utente.preferenze.join(', ') : (utente.preferenze || '');
+        }
 
     } catch (error) {
         console.error("Errore nel recupero dati profilo:", error);
@@ -52,11 +63,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         formProfilo.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Trasformiamo la stringa scritta dall'utente di nuovo in un Array pulito per il database
+            const preferenzeTesto = document.getElementById('prof-pref').value;
+            const preferenzeArray = preferenzeTesto.split(',').map(s => s.trim()).filter(s => s !== '');
+
             const update = {
                 nome: document.getElementById('prof-nome').value,
                 cognome: document.getElementById('prof-cognome').value,
                 indirizzo: document.getElementById('prof-indirizzo').value,
-                preferenze: document.getElementById('prof-pref').value,
+                preferenze: preferenzeArray,
                 metodoPagamento: {
                     tipo: document.getElementById('prof-tipo-pag').value
                 }
@@ -65,12 +80,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch(`${API_URL}/users/${uid}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify(update)
                 });
 
                 if (response.ok) {
                     mostraNotifica('Profilo aggiornato con successo!', 'success');
+                    const data = await response.json();
+
+                    if (data.token) {
+                        salvaAuthToken(data.token);
+                    }
+                    
                 } else {
                     const errore = await response.json();
                     mostraNotifica(`Errore durante l'aggiornamento: ${errore.message || ''}`, 'error');
@@ -113,18 +134,18 @@ async function eliminaAccount() {
     if (!confermato) return;
 
     try {
-        const utenteSalvato = localStorage.getItem('utenteLoggato');
-        if (!utenteSalvato) return;
+        const sessione = getSessioneUtente();
+        if (!sessione) return;
 
-        const sessione = JSON.parse(utenteSalvato);
-        const uid = sessione.utente.id;
+        const uid = sessione.id;
 
         const response = await fetch(`${API_URL}/users/${uid}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
 
         if (response.ok) {
-            localStorage.removeItem('utenteLoggato');
+            rimuoviAuthToken();
             window.location.href = 'register.html';
         } else {
             mostraNotifica('Impossibile eliminare l\'account.', 'error');

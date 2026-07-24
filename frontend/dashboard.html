@@ -63,35 +63,47 @@
             <h4 class="mb-4 fw-bold text-dark">Panoramica Ordini</h4>
             
             <div class="row mb-4 g-3">
-                <div class="col-md-4">
-                    <div class="card bg-success bg-opacity-10 border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card bg-success bg-opacity-10 border-0 shadow-sm h-100" style="border-radius: 16px;">
                         <div class="card-body p-4 d-flex align-items-center gap-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-currency-euro fs-3"></i></div>
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="min-width: 50px; height: 50px;"><i class="bi bi-currency-euro fs-3"></i></div>
                             <div>
                                 <h6 class="text-success fw-bold mb-0 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Totale Incassi</h6>
-                                <h3 class="mb-0 fw-bold text-dark" id="stat-incassi">0.00 €</h3>
+                                <h4 class="mb-0 fw-bold text-dark" id="stat-incassi">0.00 €</h4>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-primary bg-opacity-10 border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card bg-primary bg-opacity-10 border-0 shadow-sm h-100" style="border-radius: 16px;">
                         <div class="card-body p-4 d-flex align-items-center gap-3">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-bag-check fs-3"></i></div>
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="min-width: 50px; height: 50px;"><i class="bi bi-bag-check fs-3"></i></div>
                             <div>
                                 <h6 class="text-primary fw-bold mb-0 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Ordini Totali</h6>
-                                <h3 class="mb-0 fw-bold text-dark" id="stat-totali">0</h3>
+                                <h4 class="mb-0 fw-bold text-dark" id="stat-totali">0</h4>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-warning bg-opacity-10 border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card bg-warning bg-opacity-10 border-0 shadow-sm h-100" style="border-radius: 16px;">
                         <div class="card-body p-4 d-flex align-items-center gap-3">
-                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-hourglass-split fs-3"></i></div>
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="min-width: 50px; height: 50px;"><i class="bi bi-hourglass-split fs-3"></i></div>
                             <div>
                                 <h6 class="text-warning fw-bold mb-0 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Da Completare</h6>
-                                <h3 class="mb-0 fw-bold text-dark" id="stat-pendenti">0</h3>
+                                <h4 class="mb-0 fw-bold text-dark" id="stat-pendenti">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="card bg-info bg-opacity-10 border-0 shadow-sm h-100" style="border-radius: 16px;">
+                        <div class="card-body p-4 d-flex align-items-center gap-3">
+                            <div class="bg-info text-dark rounded-circle d-flex align-items-center justify-content-center" style="min-width: 50px; height: 50px;"><i class="bi bi-star-fill fs-3"></i></div>
+                            <div class="overflow-hidden">
+                                <h6 class="text-info-emphasis fw-bold mb-0 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Piatto Top</h6>
+                                <h5 class="mb-0 fw-bold text-dark text-truncate" id="stat-piatto-top" title="Caricamento...">-</h5>
                             </div>
                         </div>
                     </div>

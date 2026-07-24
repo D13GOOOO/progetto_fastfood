@@ -1,5 +1,7 @@
 /* global API_URL, mostraNotifica */
 
+import { salvaAuthToken, getSessioneUtente } from './session.js';
+
 // Genera e visualizza un toast di notifica temporaneo per i feedback legati all'autenticazione (successo o errore).
 function mostraNotificaAuth(messaggio, tipo = 'error') {
     let container = document.getElementById('toast-container-custom');
@@ -71,6 +73,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const regCognome = document.getElementById('reg-cognome');
     const regEmail = document.getElementById('reg-email');
     const regPassword = document.getElementById('reg-password');
+    const campoRuolo = document.getElementById('reg-ruolo');
+    
+    const campoPreferenze = document.getElementById('reg-preferenze');
+    const campoPagamento = document.getElementById('reg-pagamento');
+    const containerPreferenze = document.getElementById('wrapper-preferenze');
+    const containerPagamento = document.getElementById('wrapper-pagamento');
+
+    if (campoRuolo) {
+        function gestisciVisibilitaCampi() {
+            const isRistoratore = campoRuolo.value === 'ristoratore';
+            
+            if (containerPreferenze) {
+                containerPreferenze.style.display = isRistoratore ? 'none' : 'block';
+            }
+            if (campoPreferenze) {
+                campoPreferenze.disabled = isRistoratore;
+                if (isRistoratore) campoPreferenze.value = '';
+            }
+
+            if (containerPagamento) {
+                containerPagamento.style.display = isRistoratore ? 'none' : 'block';
+            }
+            if (campoPagamento) {
+                campoPagamento.disabled = isRistoratore;
+                if (isRistoratore) campoPagamento.value = 'Contanti';
+            }
+        }
+
+        campoRuolo.addEventListener('change', gestisciVisibilitaCampi);
+        gestisciVisibilitaCampi(); 
+    }
 
     if (regNome) regNome.addEventListener('input', () => validaCampo(regNome, 'testo'));
     if (regCognome) regCognome.addEventListener('input', () => validaCampo(regCognome, 'testo'));
@@ -103,11 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    localStorage.setItem('utenteLoggato', JSON.stringify(data));
+                    salvaAuthToken(data.token);
                     mostraNotificaAuth('Bentornato! Accesso effettuato con successo', 'success');
 
                     setTimeout(() => {
-                        if (data.utente.ruolo === 'ristoratore') {
+                        const sessione = getSessioneUtente() || data.utente || {};
+                        if (sessione.ruolo === 'ristoratore') {
                             window.location.href = 'dashboard.html';
                         } else {
                             window.location.href = 'index.html';
@@ -140,13 +174,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const ruoloValue = document.getElementById('reg-ruolo')?.value || 'cliente';
+            const pagamentoValue = document.getElementById('reg-pagamento')?.value || 'Contanti';
+            const preferenzeValue = document.getElementById('reg-preferenze')?.value || '';
+
             const payload = {
                 nome: regNome.value,
                 cognome: regCognome.value,
                 email: regEmail.value,
                 password: regPassword.value,
-                ruolo: document.getElementById('reg-ruolo').value,
-                preferenze: document.getElementById('reg-preferenze').value
+                ruolo: ruoloValue,
+                metodoPagamento: { tipo: ruoloValue === 'ristoratore' ? 'Contanti' : pagamentoValue },
+                preferenze: ruoloValue === 'ristoratore' ? '' : preferenzeValue
             };
 
             try {
